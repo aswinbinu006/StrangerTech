@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stranger Tech - The Upside Down Challenge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Special+Elite&family=Orbitron:wght@400;700&family=Cinzel:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <!-- ITC Benguiat Bold - The Official Stranger Things Font -->
+    <link href="https://fonts.cdnfonts.com/css/itc-benguiat" rel="stylesheet">
+    <!-- OGL WebGL Library for Circular Gallery -->
+    <script src="https://cdn.jsdelivr.net/npm/ogl@1.0.3/dist/ogl.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Scroll Progress Indicator -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+    
+    <!-- Red Clouds Background -->
+    <div class="red-clouds-bg">
+        <div class="red-cloud red-cloud-1"></div>
+        <div class="red-cloud red-cloud-2"></div>
+        <div class="red-cloud red-cloud-3"></div>
+        <div class="red-cloud red-cloud-4"></div>
+        <div class="red-cloud red-cloud-5"></div>
+        <div class="red-cloud red-cloud-6"></div>
+    </div>
+
+    <!-- Audio Controls -->
+    <div class="audio-control" id="audioControl">
+        <span class="audio-icon">🔇</span>
+    </div>
+    <audio id="bgMusic" loop preload="auto">
+        <source src="audio.mpeg" type="audio/mpeg">
+        <source src="audio.mpeg" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-dot" id="cursorDot"></div>
+    
+    <!-- Particle Container -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-logo magnetic" data-strength="0.3">
+            <span class="netflix-logo">N</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#hero" class="active magnetic" data-strength="0.2">HOME</a></li>
+            <li><a href="#about" class="magnetic" data-strength="0.2">ABOUT</a></li>
+            <li><a href="#challenge1" class="magnetic" data-strength="0.2">ROUNDS</a></li>
+            <li><a href="#prizes" class="magnetic" data-strength="0.2">PRIZES</a></li>
+            <li><a href="#faq" class="magnetic" data-strength="0.2">FAQ</a></li>
+            <li><a href="#contact" class="magnetic" data-strength="0.2">CONTACT</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="nav-search magnetic" data-strength="0.3">🔍</button>
+            <button class="nav-login magnetic" id="loginBtn" data-strength="0.3">ENTER</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Image Sequence Scroll -->
+    <section class="hero-sequence" id="hero">
+        <!-- Loading Screen -->
+        <div class="sequence-loader" id="sequenceLoader">
+            <div class="loader-content">
+                <div class="loader-text">LOADING THE UPSIDE DOWN</div>
+                <div class="loader-bar-container">
+                    <div class="loader-bar-fill" id="loaderBarFill"></div>
+                </div>
+                <div class="loader-percent" id="loaderPercent">0%</div>
+            </div>
+        </div>
+        
+        <!-- Canvas for Image Sequence -->
+        <canvas class="sequence-canvas" id="sequenceCanvas"></canvas>
+        
+        <!-- Overlay Content -->
+        <div class="sequence-overlay">
+            <!-- CSI Presents Text - Shows at start, fades on scroll -->
+            <div class="csi-presents-text visible" id="csiPresentsText">CSI PRESENTS</div>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <div class="sequence-scroll-hint" id="sequenceScrollHint">
+            <div class="scroll-mouse">
+                <div class="scroll-wheel"></div>
+            </div>
+            <span>Scroll to enter</span>
+        </div>
+    </section>
+
+    <!-- About Section - Mouse Reveal Animation -->
+    <section class="about-hero" id="about">
+        <!-- Background Layer -->
+        <div class="about-bg-base"></div>
+        
+        <!-- Fire Reveal Layer (follows mouse) -->
+        <div class="fire-reveal" id="fireReveal"></div>
+        
+        <!-- Content -->
+        <div class="about-hero-content">
+            <div class="about-left">
+                <h1 class="st-title">
+                    STRANGER<br>TECH
+                </h1>
+                <p class="st-desc">
+                    Hawkins is Calling. Will You Answer? The Gate has been opened. The Mind Flayer is in the network. And Vecna is watching. We're assembling the ultimate "Party" of tech-wizards to decode the signals, hack the Russian base, and close the rift before Hawkins—and our servers—are consumed forever.
+                </p>
+                <a href="#challenge1" class="st-btn">Enter the Upside Down</a>
+            </div>
+
+            <div class="about-right">
+                <h1 class="st-title-right">A Technical Saga</h1>
+                <p class="st-text">
+                    This isn't just a coding competition; it's a battle for survival. 5 Seasons. 5 Rounds. One ultimate Party to close the gate. Presented by CSI Student Chapter, SIT Nagpur.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Scroll hint -->
+        <div class="about-scroll-hint">
+            <span>SCROLL TO FACE YOUR FEARS</span>
+            <div class="scroll-arrow-about">↓</div>
+        </div>
+    </section>
+
+    <!-- Challenge Pages Container -->
+    <div class="challenges-wrapper">
+        
+        <!-- Challenge 1 - THE VANISHING -->
+        <section class="challenge-page" id="challenge1" data-challenge="1">
+            <div class="challenge-bg">
+                <img src="will challenge 1.png" alt="Will Byers" class="challenge-bg-img">
+                <div class="challenge-bg-overlay"></div>
+            </div>
+            <div class="challenge-content">
+                <div class="challenge-number-big">01</div>
+                <div class="challenge-info">
+                    <h2 class="challenge-title">THE VANISHING</h2>
+                    <div class="challenge-tags">
+                        <span>SIGNALS</span>
+                        <span>ENCODING</span>
+                        <span>CRYPTOGRAPHY</span>
+                    </div>
+                    <p class="challenge-description">Will is trapped in the Upside Down and can only communicate through distorted signals. Decode hidden messages using logic and number systems.</p>
+                    <div class="challenge-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">DIFFICULTY</span>
+                            <div class="difficulty-bar">
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">TIME LIMIT</span>
+                            <span class="meta-value">45 MIN</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="challenge-scroll-hint">
+                <span>SCROLL FOR NEXT CHALLENGE</span>
+                <div class="scroll-arrow">↓</div>
+            </div>
+        </section>
+
+        <!-- Challenge 2 - THE MIND FLAYER -->
+        <section class="challenge-page" id="challenge2" data-challenge="2">
+            <div class="challenge-bg">
+                <img src="Mind-Flayer challenge 2.png" alt="Mind Flayer" class="challenge-bg-img">
+                <div class="challenge-bg-overlay"></div>
+            </div>
+            <div class="challenge-content">
+                <div class="challenge-number-big">02</div>
+                <div class="challenge-info">
+                    <h2 class="challenge-title">THE MIND FLAYER</h2>
+                    <div class="challenge-tags">
+                        <span>NETWORKS</span>
+                        <span>GRAPHS</span>
+                        <span>ALGORITHMS</span>
+                    </div>
+                    <p class="challenge-description">The Mind Flayer spreads through underground tunnels. Analyze networks, trace paths, and employ algorithmic reasoning to stop the infection.</p>
+                    <div class="challenge-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">DIFFICULTY</span>
+                            <div class="difficulty-bar">
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">TIME LIMIT</span>
+                            <span class="meta-value">60 MIN</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="challenge-scroll-hint">
+                <span>SCROLL FOR NEXT CHALLENGE</span>
+                <div class="scroll-arrow">↓</div>
+            </div>
+        </section>
+
+        <!-- Challenge 3 - THE STARCOURT SIGNAL -->
+        <section class="challenge-page" id="challenge3" data-challenge="3">
+            <div class="challenge-bg">
+                <img src="Russian base.png" alt="Russian Base" class="challenge-bg-img">
+                <div class="challenge-bg-overlay"></div>
+            </div>
+            <div class="challenge-content">
+                <div class="challenge-number-big">03</div>
+                <div class="challenge-info">
+                    <h2 class="challenge-title">THE STARCOURT SIGNAL</h2>
+                    <div class="challenge-tags">
+                        <span>DEBUGGING</span>
+                        <span>REVERSE ENGINEERING</span>
+                        <span>CODE</span>
+                    </div>
+                    <p class="challenge-description">A secret transmission from Starcourt Mall. Find and fix the logical flaw in the code to gain access to the Russian base.</p>
+                    <div class="challenge-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">DIFFICULTY</span>
+                            <div class="difficulty-bar">
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">TIME LIMIT</span>
+                            <span class="meta-value">50 MIN</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="challenge-scroll-hint">
+                <span>SCROLL FOR NEXT CHALLENGE</span>
+                <div class="scroll-arrow">↓</div>
+            </div>
+        </section>
+
+        <!-- Challenge 4 - THE CURSE OF VECNA -->
+        <section class="challenge-page" id="challenge4" data-challenge="4">
+            <div class="challenge-bg">
+                <img src="Vecna challenge 4.png" alt="Vecna" class="challenge-bg-img">
+                <div class="challenge-bg-overlay"></div>
+            </div>
+            <div class="challenge-content">
+                <div class="challenge-number-big">04</div>
+                <div class="challenge-info">
+                    <h2 class="challenge-title">THE CURSE OF VECNA</h2>
+                    <div class="challenge-tags">
+                        <span>OS</span>
+                        <span>FILE SYSTEMS</span>
+                        <span>CLI</span>
+                    </div>
+                    <p class="challenge-description">Vecna has trapped a teammate in a trance. Navigate deep file systems, uncover hidden files, and retrieve the secret to save them.</p>
+                    <div class="challenge-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">DIFFICULTY</span>
+                            <div class="difficulty-bar">
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">TIME LIMIT</span>
+                            <span class="meta-value">75 MIN</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="challenge-scroll-hint">
+                <span>SCROLL FOR NEXT CHALLENGE</span>
+                <div class="scroll-arrow">↓</div>
+            </div>
+        </section>
+
+        <!-- Challenge 5 - THE FINAL WAR -->
+        <section class="challenge-page" id="challenge5" data-challenge="5">
+            <div class="challenge-bg">
+                <img src="The gate Challenge 5.png" alt="The Gate" class="challenge-bg-img">
+                <div class="challenge-bg-overlay"></div>
+            </div>
+            <div class="challenge-content">
+                <div class="challenge-number-big">05</div>
+                <div class="challenge-info">
+                    <h2 class="challenge-title">THE FINAL WAR</h2>
+                    <div class="challenge-tags">
+                        <span>INTEGRATION</span>
+                        <span>DEPLOYMENT</span>
+                        <span>PROTOTYPING</span>
+                    </div>
+                    <p class="challenge-description">The barrier between worlds is collapsing. Fix, integrate, and deploy a working system under pressure to seal the rift and win.</p>
+                    <div class="challenge-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">DIFFICULTY</span>
+                            <div class="difficulty-bar">
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                                <span class="filled"></span>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">TIME LIMIT</span>
+                            <span class="meta-value">90 MIN</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="challenge-scroll-hint">
+                <span>CONTINUE TO PRIZES</span>
+                <div class="scroll-arrow">↓</div>
+            </div>
+        </section>
+
+    </div><!-- End Challenges Wrapper -->
+
+    <!-- Gallery Section - Previous Events -->
+    <section class="gallery-section" id="gallery">
+        <div class="section-header">
+            <span class="section-tag">SEC. 003</span>
+            <h2 class="section-title gsap-title">MEMORIES FROM HAWKINS</h2>
+            <p class="section-subtitle gsap-fade">Glimpses from previous expeditions into the Upside Down</p>
+        </div>
+        
+        <!-- Circular 3D Gallery -->
+        <div class="circular-gallery-wrapper">
+            <div class="circular-gallery" id="circularGallery"></div>
+        </div>
+        
+        <!-- Floating particles -->
+        <div class="gallery-particles">
+            <span class="g-particle"></span>
+            <span class="g-particle"></span>
+            <span class="g-particle"></span>
+            <span class="g-particle"></span>
+            <span class="g-particle"></span>
+        </div>
+    </section>
+
+    <!-- Prize Pool Section -->
+    <section class="prize-section" id="prizes">
+        <div class="prize-sticky-wrapper">
+            <div class="section-header">
+                <h2 class="section-title">PRIZE POOL</h2>
+                <p class="section-subtitle">Rewards for those who survive the Upside Down</p>
+            </div>
+            
+            <div class="prize-container">
+                <!-- Road Track with scroll-driven animation -->
+                <div class="cycling-track">
+                    <div class="road-line"></div>
+                    <div class="road-trees">
+                        <span class="tree">🌲</span>
+                        <span class="tree">🌲</span>
+                        <span class="tree">🌲</span>
+                        <span class="tree">🌲</span>
+                        <span class="tree">🌲</span>
+                    </div>
+                    
+                    <!-- Stranger Things School Bus - moves with scroll -->
+                    <div class="school-bus-group" id="cyclistsGroup">
+                        <div class="school-bus">
+                            <!-- Bus Body -->
+                            <div class="bus-body">
+                                <div class="bus-roof"></div>
+                                <div class="bus-windows">
+                                    <div class="bus-window">
+                                        <div class="window-silhouette"></div>
+                                    </div>
+                                    <div class="bus-window">
+                                        <div class="window-silhouette"></div>
+                                    </div>
+                                    <div class="bus-window">
+                                        <div class="window-silhouette"></div>
+                                    </div>
+                                    <div class="bus-window driver-window">
+                                        <div class="window-silhouette driver"></div>
+                                    </div>
+                                </div>
+                                <div class="bus-stripe"></div>
+                                <div class="bus-text">HAWKINS</div>
+                                <div class="bus-door"></div>
+                                <div class="bus-headlights">
+                                    <div class="headlight"></div>
+                                    <div class="headlight"></div>
+                                </div>
+                            </div>
+                            <!-- Bus Wheels -->
+                            <div class="bus-wheels">
+                                <div class="bus-wheel front-bus-wheel">
+                                    <div class="wheel-hub"></div>
+                                </div>
+                                <div class="bus-wheel back-bus-wheel">
+                                    <div class="wheel-hub"></div>
+                                </div>
+                            </div>
+                            <!-- Bus Exhaust -->
+                            <div class="bus-exhaust">
+                                <div class="exhaust-puff puff-1"></div>
+                                <div class="exhaust-puff puff-2"></div>
+                                <div class="exhaust-puff puff-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Prize Cards - Stranger Things Themed -->
+                <div class="prizes-row">
+                    <div class="prize-card prize-3" data-prize="3">
+                        <div class="prize-lights">
+                            <span class="light light-1"></span>
+                            <span class="light light-2"></span>
+                            <span class="light light-3"></span>
+                        </div>
+                        <div class="prize-rank">3RD</div>
+                        <div class="prize-icon-st">
+                            <div class="eggo-waffle bronze-eggo">
+                                <div class="waffle-grid"></div>
+                                <span class="eggo-text">011</span>
+                            </div>
+                        </div>
+                        <div class="prize-amount">₹5,000</div>
+                        <div class="prize-label">BRONZE</div>
+                        <div class="upside-down-vines-card"></div>
+                    </div>
+                    
+                    <div class="prize-card prize-1" data-prize="1">
+                        <div class="prize-lights champion-lights">
+                            <span class="light light-1"></span>
+                            <span class="light light-2"></span>
+                            <span class="light light-3"></span>
+                            <span class="light light-4"></span>
+                            <span class="light light-5"></span>
+                        </div>
+                        <div class="prize-rank">1ST</div>
+                        <div class="prize-icon-st">
+                            <div class="portal-icon">
+                                <div class="portal-ring ring-1"></div>
+                                <div class="portal-ring ring-2"></div>
+                                <div class="portal-ring ring-3"></div>
+                                <div class="portal-center">
+                                    <span>011</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="prize-amount">₹15,000</div>
+                        <div class="prize-label">CHAMPION</div>
+                        <div class="prize-glow"></div>
+                        <div class="demogorgon-particles"></div>
+                    </div>
+                    
+                    <div class="prize-card prize-2" data-prize="2">
+                        <div class="prize-lights">
+                            <span class="light light-1"></span>
+                            <span class="light light-2"></span>
+                            <span class="light light-3"></span>
+                            <span class="light light-4"></span>
+                        </div>
+                        <div class="prize-rank">2ND</div>
+                        <div class="prize-icon-st">
+                            <div class="cassette-tape">
+                                <div class="tape-body">
+                                    <div class="tape-window">
+                                        <div class="tape-reel reel-left"></div>
+                                        <div class="tape-reel reel-right"></div>
+                                    </div>
+                                    <div class="tape-label">MIX TAPE</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="prize-amount">₹10,000</div>
+                        <div class="prize-label">SILVER</div>
+                        <div class="upside-down-vines-card"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="prize-scroll-hint">↓ SCROLL TO REVEAL PRIZES ↓</div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section" id="team">
+        <div class="section-header">
+            <span class="section-tag">SEC. 004</span>
+            <h2 class="section-title gsap-title">THE PARTY</h2>
+            <p class="section-subtitle gsap-fade">The heroes behind the Upside Down Challenge</p>
+        </div>
+        
+        <div class="team-container">
+            <div class="team-grid">
+                <div class="team-member gsap-team" data-index="1">
+                    <div class="member-card">
+                        <div class="member-image">
+                            <div class="member-placeholder">
+                                <span class="member-initial">E</span>
+                            </div>
+                            <div class="member-glow"></div>
+                        </div>
+                        <div class="member-info">
+                            <h3 class="member-name">Eleven</h3>
+                            <span class="member-role">Lead Organizer</span>
+                            <p class="member-quote">"I can do things."</p>
+                        </div>
+                        <div class="member-lights">
+                            <span class="m-light"></span>
+                            <span class="m-light"></span>
+                            <span class="m-light"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-member gsap-team" data-index="2">
+                    <div class="member-card">
+                        <div class="member-image">
+                            <div class="member-placeholder">
+                                <span class="member-initial">M</span>
+                            </div>
+                            <div class="member-glow"></div>
+                        </div>
+                        <div class="member-info">
+                            <h3 class="member-name">Mike Wheeler</h3>
+                            <span class="member-role">Technical Lead</span>
+                            <p class="member-quote">"We never give up."</p>
+                        </div>
+                        <div class="member-lights">
+                            <span class="m-light"></span>
+                            <span class="m-light"></span>
+                            <span class="m-light"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-member gsap-team" data-index="3">
+                    <div class="member-card">
+                        <div class="member-image">
+                            <div class="member-placeholder">
+                                <span class="member-initial">D</span>
+                            </div>
+                            <div class="member-glow"></div>
+                        </div>
+                        <div class="member-info">
+                            <h3 class="member-name">Dustin Henderson</h3>
+                            <span class="member-role">Challenge Designer</span>
+                            <p class="member-quote">"She's our friend and she's crazy!"</p>
+                        </div>
+                        <div class="member-lights">
+                            <span class="m-light"></span>
+                            <span class="m-light"></span>
+                            <span class="m-light"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-member gsap-team" data-index="4">
+                    <div class="member-card">
+                        <div class="member-image">
+                            <div class="member-placeholder">
+                                <span class="member-initial">L</span>
+                            </div>
+                            <div class="member-glow"></div>
+                        </div>
+                        <div class="member-info">
+                            <h3 class="member-name">Lucas Sinclair</h3>
+                            <span class="member-role">Event Coordinator</span>
+                            <p class="member-quote">"Always be prepared."</p>
+                        </div>
+                        <div class="member-lights">
+                            <span class="m-light"></span>
+                            <span class="m-light"></span>
+                            <span class="m-light"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Upside Down vines decoration -->
+        <div class="team-vines">
+            <div class="t-vine t-vine-1"></div>
+            <div class="t-vine t-vine-2"></div>
+            <div class="t-vine t-vine-3"></div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section" id="faq">
+        <div class="section-header">
+            <span class="section-tag">SEC. 005</span>
+            <h2 class="section-title">FREQUENTLY ASKED</h2>
+            <p class="section-subtitle">Everything you need to know before entering the Upside Down</p>
+        </div>
+        
+        <div class="faq-container">
+            <div class="faq-item" data-index="1">
+                <div class="faq-question">
+                    <span class="faq-icon">❓</span>
+                    <h3>What is Stranger Tech?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Stranger Tech is an immersive coding challenge themed around Stranger Things. Teams compete through five rounds of increasingly difficult puzzles involving cryptography, algorithms, debugging, and system integration.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item" data-index="2">
+                <div class="faq-question">
+                    <span class="faq-icon">👥</span>
+                    <h3>How many members per team?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Each team can have 2-4 members. We recommend having diverse skills in your team - coding, problem-solving, and logical thinking will all be tested!</p>
+                </div>
+            </div>
+            
+            <div class="faq-item" data-index="3">
+                <div class="faq-question">
+                    <span class="faq-icon">💻</span>
+                    <h3>What skills do I need?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Basic programming knowledge is helpful but not mandatory. The challenges test logical thinking, pattern recognition, cryptography basics, and teamwork. All skill levels are welcome!</p>
+                </div>
+            </div>
+            
+            <div class="faq-item" data-index="4">
+                <div class="faq-question">
+                    <span class="faq-icon">📅</span>
+                    <h3>When and where is the event?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>The event will be held on campus at the CSI auditorium. Exact dates will be announced soon. Follow our social media for updates!</p>
+                </div>
+            </div>
+            
+            <div class="faq-item" data-index="5">
+                <div class="faq-question">
+                    <span class="faq-icon">🎁</span>
+                    <h3>What are the prizes?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>1st Place: ₹15,000 | 2nd Place: ₹10,000 | 3rd Place: ₹5,000. Plus certificates, swag, and bragging rights for surviving the Upside Down!</p>
+                </div>
+            </div>
+            
+            <div class="faq-item" data-index="6">
+                <div class="faq-question">
+                    <span class="faq-icon">📝</span>
+                    <h3>How do I register?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Click the "ENTER" button in the navigation to register your team. You'll need team name, member details, and contact information. Registration is free!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Floating lights decoration -->
+        <div class="faq-lights">
+            <span class="f-light"></span>
+            <span class="f-light"></span>
+            <span class="f-light"></span>
+            <span class="f-light"></span>
+            <span class="f-light"></span>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+        <div class="section-header">
+            <span class="section-tag">SEC. 006</span>
+            <h2 class="section-title">CONTACT US</h2>
+            <p class="section-subtitle">Reach out to Hawkins Lab for any queries</p>
+        </div>
+        
+        <div class="contact-container">
+            <div class="contact-info">
+                <div class="contact-card">
+                    <div class="contact-icon">📍</div>
+                    <h3>Location</h3>
+                    <p>Hawkins National Laboratory<br>CSI Department, Main Campus</p>
+                </div>
+                
+                <div class="contact-card">
+                    <div class="contact-icon">📧</div>
+                    <h3>Email</h3>
+                    <p>strangertech@csi.edu<br>support@strangertech.com</p>
+                </div>
+                
+                <div class="contact-card">
+                    <div class="contact-icon">📱</div>
+                    <h3>Phone</h3>
+                    <p>+91 98765 43210<br>+91 12345 67890</p>
+                </div>
+                
+                <div class="contact-card">
+                    <div class="contact-icon">🕐</div>
+                    <h3>Hours</h3>
+                    <p>Mon - Fri: 9AM - 6PM<br>Sat: 10AM - 4PM</p>
+                </div>
+            </div>
+            
+            <div class="contact-form-wrapper">
+                <form class="contact-form" id="contactForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contactName">Your Name</label>
+                            <input type="text" id="contactName" name="name" placeholder="Mike Wheeler" required>
+                            <div class="input-line"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactEmail">Email Address</label>
+                            <input type="email" id="contactEmail" name="email" placeholder="mike@hawkins.com" required>
+                            <div class="input-line"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contactSubject">Subject</label>
+                        <input type="text" id="contactSubject" name="subject" placeholder="Question about the event">
+                        <div class="input-line"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contactMessage">Message</label>
+                        <textarea id="contactMessage" name="message" rows="5" placeholder="Tell us what's on your mind..." required></textarea>
+                        <div class="input-line"></div>
+                    </div>
+                    
+                    <button type="submit" class="contact-submit">
+                        <span class="btn-text">SEND MESSAGE</span>
+                        <span class="btn-icon">📨</span>
+                        <div class="btn-glow"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Upside Down particles -->
+        <div class="contact-particles">
+            <span class="c-particle"></span>
+            <span class="c-particle"></span>
+            <span class="c-particle"></span>
+            <span class="c-particle"></span>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <!-- Upside Down Vines Animation -->
+        <div class="footer-vines">
+            <div class="vine vine-1"></div>
+            <div class="vine vine-2"></div>
+            <div class="vine vine-3"></div>
+            <div class="vine vine-4"></div>
+            <div class="vine vine-5"></div>
+        </div>
+        
+        <!-- Floating Particles -->
+        <div class="footer-particles">
+            <span class="particle"></span>
+            <span class="particle"></span>
+            <span class="particle"></span>
+            <span class="particle"></span>
+            <span class="particle"></span>
+        </div>
+        
+        <div class="footer-main">
+            <!-- Logo Section -->
+            <div class="footer-brand">
+                <div class="footer-logo-container">
+                    <span class="footer-logo-text">STRANGER</span>
+                    <span class="footer-logo-accent">TECH</span>
+                </div>
+                <p class="footer-tagline">The Upside Down Challenge 2026</p>
+                <p class="footer-quote">"Friends don't lie."</p>
+            </div>
+            
+            <!-- Navigation Links -->
+            <div class="footer-nav">
+                <h4 class="footer-nav-title">NAVIGATE</h4>
+                <div class="footer-nav-links">
+                    <a href="#hero">Home</a>
+                    <a href="#about">About</a>
+                    <a href="#challenge1">Rounds</a>
+                    <a href="#prizes">Prizes</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="#contact">Contact</a>
+                </div>
+            </div>
+            
+            <!-- Info Links -->
+            <div class="footer-info">
+                <h4 class="footer-nav-title">INFO</h4>
+                <div class="footer-nav-links">
+                    <a href="#">Rules</a>
+                    <a href="#">FAQ</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Privacy</a>
+                </div>
+            </div>
+            
+            <!-- Social & Contact -->
+            <div class="footer-connect">
+                <h4 class="footer-nav-title">CONNECT</h4>
+                <div class="footer-social">
+                    <a href="#" class="social-icon" title="Twitter/X">
+                        <span>𝕏</span>
+                    </a>
+                    <a href="#" class="social-icon" title="Instagram">
+                        <span>IG</span>
+                    </a>
+                    <a href="#" class="social-icon" title="Discord">
+                        <span>DC</span>
+                    </a>
+                </div>
+                <p class="footer-contact">hawkins@strangertech.com</p>
+            </div>
+        </div>
+        
+        <!-- Christmas Lights Divider -->
+        <div class="footer-lights">
+            <span class="light red"></span>
+            <span class="light green"></span>
+            <span class="light blue"></span>
+            <span class="light yellow"></span>
+            <span class="light red"></span>
+            <span class="light green"></span>
+            <span class="light blue"></span>
+            <span class="light yellow"></span>
+            <span class="light red"></span>
+            <span class="light green"></span>
+            <span class="light blue"></span>
+            <span class="light yellow"></span>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2026 The Upside Down Challenge. All rights reserved.</p>
+            <div class="footer-eleven">
+                <span class="eleven-number">011</span>
+                <div class="eleven-nosebleed"></div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal - Stranger Things Themed -->
+    <div class="modal" id="loginModal">
+        <!-- Upside Down Particles -->
+        <div class="modal-particles">
+            <span class="modal-particle"></span>
+            <span class="modal-particle"></span>
+            <span class="modal-particle"></span>
+            <span class="modal-particle"></span>
+            <span class="modal-particle"></span>
+            <span class="modal-particle"></span>
+        </div>
+        
+        <div class="modal-content">
+            <!-- Christmas Lights at top -->
+            <div class="modal-lights">
+                <span class="m-light red"></span>
+                <span class="m-light yellow"></span>
+                <span class="m-light blue"></span>
+                <span class="m-light green"></span>
+                <span class="m-light red"></span>
+                <span class="m-light yellow"></span>
+                <span class="m-light blue"></span>
+            </div>
+            
+            <!-- Vines decoration -->
+            <div class="modal-vines">
+                <div class="m-vine v1"></div>
+                <div class="m-vine v2"></div>
+                <div class="m-vine v3"></div>
+            </div>
+            
+            <button class="modal-close" id="modalClose">×</button>
+            
+            <!-- Eleven's number -->
+            <div class="modal-eleven">011</div>
+            
+            <h2 class="modal-title">
+                <span class="title-line">ENTER THE</span>
+                <span class="title-upside">UPSIDE DOWN</span>
+            </h2>
+            
+            <p class="modal-subtitle">"Friends don't lie."</p>
+            
+            <form class="modal-form">
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input type="text" placeholder="TEAM NAME" required>
+                    <div class="input-glow"></div>
+                </div>
+                <div class="input-wrapper">
+                    <span class="input-icon">📧</span>
+                    <input type="email" placeholder="EMAIL" required>
+                    <div class="input-glow"></div>
+                </div>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔑</span>
+                    <input type="password" placeholder="ACCESS CODE" required>
+                    <div class="input-glow"></div>
+                </div>
+                <button type="submit" class="modal-submit">
+                    <span class="btn-text">ENTER THE GATE</span>
+                    <div class="btn-portal"></div>
+                </button>
+            </form>
+            
+            <p class="modal-hint">No access code? <a href="#">Contact Hawkins Lab</a></p>
+            
+            <!-- Bottom decoration -->
+            <div class="modal-demogorgon"></div>
+        </div>
+    </div>
+
+    <!-- Premium Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.0.42/dist/lenis.min.js"></script>
+    <!-- SplitType for text animations -->
+    <script src="https://unpkg.com/split-type"></script>
+    <script src="script.js"></script>
+</body>
+</html>
