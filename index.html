@@ -10,8 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Special+Elite&family=Orbitron:wght@400;700&family=Cinzel:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <!-- ITC Benguiat Bold - The Official Stranger Things Font -->
     <link href="https://fonts.cdnfonts.com/css/itc-benguiat" rel="stylesheet">
-    <!-- OGL WebGL Library for Circular Gallery -->
-    <script src="https://cdn.jsdelivr.net/npm/ogl@1.0.3/dist/ogl.umd.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -28,9 +26,24 @@
         <div class="red-cloud red-cloud-6"></div>
     </div>
 
-    <!-- Audio Controls -->
+    <!-- Audio Controls - Stranger Things Themed -->
     <div class="audio-control" id="audioControl">
-        <span class="audio-icon">🔇</span>
+        <div class="audio-icon-wrapper">
+            <div class="audio-bars">
+                <span class="bar bar-1"></span>
+                <span class="bar bar-2"></span>
+                <span class="bar bar-3"></span>
+                <span class="bar bar-4"></span>
+            </div>
+            <div class="audio-muted-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                    <line x1="23" y1="9" x2="17" y2="15"/>
+                    <line x1="17" y1="9" x2="23" y2="15"/>
+                </svg>
+            </div>
+        </div>
+        <span class="audio-pulse"></span>
     </div>
     <audio id="bgMusic" loop preload="auto">
         <source src="audio.mpeg" type="audio/mpeg">
@@ -50,18 +63,23 @@
         <div class="nav-logo magnetic" data-strength="0.3">
             <span class="netflix-logo">N</span>
         </div>
-        <ul class="nav-links">
+        
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        
+        <ul class="nav-links" id="navLinks">
             <li><a href="#hero" class="active magnetic" data-strength="0.2">HOME</a></li>
             <li><a href="#about" class="magnetic" data-strength="0.2">ABOUT</a></li>
             <li><a href="#challenge1" class="magnetic" data-strength="0.2">ROUNDS</a></li>
+            <li><a href="#gallery" class="magnetic" data-strength="0.2">GALLERY</a></li>
             <li><a href="#prizes" class="magnetic" data-strength="0.2">PRIZES</a></li>
             <li><a href="#faq" class="magnetic" data-strength="0.2">FAQ</a></li>
             <li><a href="#contact" class="magnetic" data-strength="0.2">CONTACT</a></li>
         </ul>
-        <div class="nav-right">
-            <button class="nav-search magnetic" data-strength="0.3">🔍</button>
-            <button class="nav-login magnetic" id="loginBtn" data-strength="0.3">ENTER</button>
-        </div>
     </nav>
 
     <!-- Hero Section with Image Sequence Scroll -->
@@ -136,7 +154,7 @@
         <!-- Challenge 1 - THE VANISHING -->
         <section class="challenge-page" id="challenge1" data-challenge="1">
             <div class="challenge-bg">
-                <img src="will challenge 1.png" alt="Will Byers" class="challenge-bg-img">
+                <img src="Challenges Photos/Challenge 1 (1).jpeg" alt="Will Byers" class="challenge-bg-img" loading="eager">
                 <div class="challenge-bg-overlay"></div>
             </div>
             <div class="challenge-content">
@@ -177,7 +195,7 @@
         <!-- Challenge 2 - THE MIND FLAYER -->
         <section class="challenge-page" id="challenge2" data-challenge="2">
             <div class="challenge-bg">
-                <img src="Mind-Flayer challenge 2.png" alt="Mind Flayer" class="challenge-bg-img">
+                <img src="Challenges Photos/Challenge 2.jpeg" alt="Mind Flayer" class="challenge-bg-img" loading="lazy">
                 <div class="challenge-bg-overlay"></div>
             </div>
             <div class="challenge-content">
@@ -218,7 +236,7 @@
         <!-- Challenge 3 - THE STARCOURT SIGNAL -->
         <section class="challenge-page" id="challenge3" data-challenge="3">
             <div class="challenge-bg">
-                <img src="Russian base.png" alt="Russian Base" class="challenge-bg-img">
+                <img src="Challenges Photos/Challenge 3.jpg" alt="Russian Base" class="challenge-bg-img" loading="lazy">
                 <div class="challenge-bg-overlay"></div>
             </div>
             <div class="challenge-content">
@@ -259,7 +277,7 @@
         <!-- Challenge 4 - THE CURSE OF VECNA -->
         <section class="challenge-page" id="challenge4" data-challenge="4">
             <div class="challenge-bg">
-                <img src="Vecna challenge 4.png" alt="Vecna" class="challenge-bg-img">
+                <img src="Challenges Photos/Challenge 4.jpeg" alt="Vecna" class="challenge-bg-img" loading="lazy">
                 <div class="challenge-bg-overlay"></div>
             </div>
             <div class="challenge-content">
@@ -300,7 +318,7 @@
         <!-- Challenge 5 - THE FINAL WAR -->
         <section class="challenge-page" id="challenge5" data-challenge="5">
             <div class="challenge-bg">
-                <img src="The gate Challenge 5.png" alt="The Gate" class="challenge-bg-img">
+                <img src="Challenges Photos/Challenge 5.jpeg" alt="The Gate" class="challenge-bg-img" loading="lazy">
                 <div class="challenge-bg-overlay"></div>
             </div>
             <div class="challenge-content">
@@ -348,9 +366,48 @@
             <p class="section-subtitle gsap-fade">Glimpses from previous expeditions into the Upside Down</p>
         </div>
         
-        <!-- Circular 3D Gallery -->
-        <div class="circular-gallery-wrapper">
-            <div class="circular-gallery" id="circularGallery"></div>
+        <!-- Auto-scrolling Gallery -->
+        <div class="gallery-scroll-wrapper">
+            <div class="gallery-scroll-track">
+                <!-- First set of images -->
+                <div class="gallery-scroll-item">
+                    <img src="gallery/IMG-20250919-WA0115.png" alt="Event" loading="lazy">
+                </div>
+                <div class="gallery-scroll-item">
+                    <img src="gallery/IMG-20250919-WA0116.png" alt="Event" loading="lazy">
+                </div>
+                <div class="gallery-scroll-item">
+                    <img src="gallery/IMG-20250919-WA0117.png" alt="Event" loading="lazy">
+                </div>
+                <div class="gallery-scroll-item">
+                    <img src="gallery/IMG-20250919-WA0123.png" alt="Event" loading="lazy">
+                </div>
+                <div class="gallery-scroll-item">
+                    <img src="gallery/WhatsApp Image 2026-01-12 at 13.21.16.jpeg" alt="Event" loading="lazy">
+                </div>
+                <div class="gallery-scroll-item">
+                    <img src="gallery/WhatsApp Image 2026-01-12 at 13.21.18.jpeg" alt="Event" loading="lazy">
+                </div>
+                <!-- Duplicate set for seamless loop -->
+                <div class="gallery-scroll-item">
+                    <img src="gallery/IMG-20250919-WA0115.png" alt="Event" loading="lazy">
+                </div>
+                <div class="gallery-scroll-item">
+                    <img src="gallery/IMG-20250919-WA0116.png" alt="Event" loading="lazy">
+                </div>
+                <div class="gallery-scroll-item">
+                    <img src="gallery/IMG-20250919-WA0117.png" alt="Event" loading="lazy">
+                </div>
+                <div class="gallery-scroll-item">
+                    <img src="gallery/IMG-20250919-WA0123.png" alt="Event" loading="lazy">
+                </div>
+                <div class="gallery-scroll-item">
+                    <img src="gallery/WhatsApp Image 2026-01-12 at 13.21.16.jpeg" alt="Event" loading="lazy">
+                </div>
+                <div class="gallery-scroll-item">
+                    <img src="gallery/WhatsApp Image 2026-01-12 at 13.21.18.jpeg" alt="Event" loading="lazy">
+                </div>
+            </div>
         </div>
         
         <!-- Floating particles -->
@@ -821,12 +878,12 @@
             
             <!-- Info Links -->
             <div class="footer-info">
-                <h4 class="footer-nav-title">INFO</h4>
+                <h4 class="footer-nav-title">LEGAL</h4>
                 <div class="footer-nav-links">
-                    <a href="#">Rules</a>
-                    <a href="#">FAQ</a>
-                    <a href="#">Contact</a>
-                    <a href="#">Privacy</a>
+                    <a href="#privacy">Privacy Policy</a>
+                    <a href="#terms">Terms of Use</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="#contact">Contact</a>
                 </div>
             </div>
             
@@ -844,7 +901,20 @@
                         <span>DC</span>
                     </a>
                 </div>
-                <p class="footer-contact">hawkins@strangertech.com</p>
+                <p class="footer-contact">csi@sitnagpur.edu.in</p>
+            </div>
+        </div>
+        
+        <!-- Credits Section -->
+        <div class="footer-credits">
+            <div class="credits-content">
+                <p class="credits-title">STRANGER THINGS CREDITS</p>
+                <p class="credits-text">
+                    Stranger Things is created by <strong>The Duffer Brothers</strong> (Matt Duffer & Ross Duffer).
+                    All Stranger Things imagery, characters, and related content are property of <strong>Netflix</strong>.
+                    This is a fan-made event website and is not affiliated with Netflix or the official Stranger Things production.
+                </p>
+                <p class="credits-netflix">A Netflix Original Series</p>
             </div>
         </div>
         
@@ -865,7 +935,8 @@
         </div>
         
         <div class="footer-bottom">
-            <p>© 2026 The Upside Down Challenge. All rights reserved.</p>
+            <p>© 2026 CSI Student Chapter, SIT Nagpur. All rights reserved.</p>
+            <p class="footer-disclaimer">This website is a fan project. Stranger Things™ is a trademark of Netflix.</p>
             <div class="footer-eleven">
                 <span class="eleven-number">011</span>
                 <div class="eleven-nosebleed"></div>

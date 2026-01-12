@@ -7,6 +7,75 @@
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 // ============================================
+// GLOBAL IMAGE PRELOADER - Load all images during loading screen
+// ============================================
+
+const ImagePreloader = {
+    // All images to preload
+    imagesToLoad: [
+        // Challenge images from Challenges Photos folder
+        'Challenges Photos/Challenge 1 (1).jpeg',
+        'Challenges Photos/Challenge 2.jpeg',
+        'Challenges Photos/Challenge 3.jpg',
+        'Challenges Photos/Challenge 4.jpeg',
+        'Challenges Photos/Challenge 5.jpeg',
+        // About section
+        'will1.webp',
+        'v1.png',
+        // Gallery images
+        'gallery/IMG-20250919-WA0115.png',
+        'gallery/IMG-20250919-WA0116.png',
+        'gallery/IMG-20250919-WA0117.png',
+        'gallery/IMG-20250919-WA0123.png',
+        'gallery/WhatsApp Image 2026-01-12 at 13.21.16.jpeg',
+        'gallery/WhatsApp Image 2026-01-12 at 13.21.18.jpeg'
+    ],
+    
+    loadedImages: [],
+    totalImages: 0,
+    loadedCount: 0,
+    
+    init() {
+        this.totalImages = this.imagesToLoad.length;
+        return this.preloadAll();
+    },
+    
+    preloadAll() {
+        return new Promise((resolve) => {
+            if (this.totalImages === 0) {
+                resolve();
+                return;
+            }
+            
+            this.imagesToLoad.forEach(src => {
+                const img = new Image();
+                img.src = src;
+                
+                img.onload = () => {
+                    this.loadedCount++;
+                    this.loadedImages.push(img);
+                    if (this.loadedCount >= this.totalImages) {
+                        resolve();
+                    }
+                };
+                
+                img.onerror = () => {
+                    this.loadedCount++;
+                    console.warn(`Failed to preload: ${src}`);
+                    if (this.loadedCount >= this.totalImages) {
+                        resolve();
+                    }
+                };
+            });
+        });
+    },
+    
+    getProgress() {
+        return this.totalImages > 0 ? (this.loadedCount / this.totalImages) * 100 : 100;
+    }
+};
+
+// ============================================
 // IMAGE SEQUENCE SCROLL SYSTEM
 // ============================================
 
@@ -75,6 +144,10 @@ const ImageSequenceScroll = {
     
     preloadImages() {
         let loadedCount = 0;
+        const totalToLoad = this.frameCount + ImagePreloader.totalImages;
+        
+        // Start preloading other images in parallel
+        ImagePreloader.init();
         
         for (let i = 0; i < this.frameCount; i++) {
             const img = new Image();
@@ -82,13 +155,13 @@ const ImageSequenceScroll = {
             
             img.onload = () => {
                 loadedCount++;
-                const progress = Math.round((loadedCount / this.frameCount) * 100);
+                const combinedProgress = Math.round(((loadedCount + ImagePreloader.loadedCount) / totalToLoad) * 100);
                 
                 if (this.loaderBar) {
-                    this.loaderBar.style.width = progress + '%';
+                    this.loaderBar.style.width = combinedProgress + '%';
                 }
                 if (this.loaderPercent) {
-                    this.loaderPercent.textContent = progress + '%';
+                    this.loaderPercent.textContent = combinedProgress + '%';
                 }
                 
                 if (loadedCount === this.frameCount) {
@@ -1379,10 +1452,7 @@ window.addEventListener('load', () => {
 // DOM Elements
 const audioControl = document.getElementById('audioControl');
 const bgMusic = document.getElementById('bgMusic');
-const loginBtn = document.getElementById('loginBtn');
 const startBtn = document.getElementById('startBtn');
-const loginModal = document.getElementById('loginModal');
-const modalClose = document.getElementById('modalClose');
 const glitchOverlay = document.querySelector('.glitch-overlay');
 const particlesContainer = document.getElementById('particles');
 const cursor = document.getElementById('cursor');
@@ -1411,7 +1481,6 @@ document.querySelectorAll('a, button, .round-card, .sponsor-card').forEach(el =>
 
 // Audio Control with Web Audio API for maximum volume boost
 let isMuted = true;
-const audioIcon = document.querySelector('.audio-icon');
 let audioContext = null;
 let gainNode = null;
 
@@ -1434,8 +1503,8 @@ if (bgMusic && audioControl) {
         isMuted = !isMuted;
         if (isMuted) {
             bgMusic.pause();
+            audioControl.classList.remove('playing');
             audioControl.classList.add('muted');
-            if (audioIcon) audioIcon.textContent = '🔇';
         } else {
             // Setup audio boost on first play
             setupAudioBoost();
@@ -1449,19 +1518,11 @@ if (bgMusic && audioControl) {
             bgMusic.play().then(() => {
                 console.log('Audio playing at boosted volume');
                 audioControl.classList.remove('muted');
-                if (audioIcon) audioIcon.textContent = '🔊';
+                audioControl.classList.add('playing');
             }).catch(err => {
                 console.error('Audio play failed:', err);
             });
         }
-    });
-}
-
-// Modal Controls - with null checks
-if (loginBtn) {
-    loginBtn.addEventListener('click', () => {
-        if (loginModal) loginModal.classList.add('active');
-        triggerGlitch();
     });
 }
 
@@ -1472,20 +1533,6 @@ if (startBtn) {
             scrollTo: '#rounds',
             ease: 'power2.inOut'
         });
-    });
-}
-
-if (modalClose) {
-    modalClose.addEventListener('click', () => {
-        if (loginModal) loginModal.classList.remove('active');
-    });
-}
-
-if (loginModal) {
-    loginModal.addEventListener('click', (e) => {
-        if (e.target === loginModal) {
-            loginModal.classList.remove('active');
-        }
     });
 }
 
@@ -2037,6 +2084,7 @@ gsap.to('.rounds-bg-effects', {
 // ============================================
 
 // Set initial hidden state for all challenge rows with 3D transforms
+// Note: Using .challenge-row prefix to avoid affecting .challenge-page elements
 gsap.set('.challenge-row', {
     opacity: 0,
     y: 120,
@@ -2044,28 +2092,28 @@ gsap.set('.challenge-row', {
     transformPerspective: 1000,
     transformOrigin: 'center bottom'
 });
-gsap.set('.challenge-image', {
+gsap.set('.challenge-row .challenge-image', {
     opacity: 0,
     scale: 0.7,
     rotationY: 0,
     filter: 'blur(10px)'
 });
-gsap.set('.challenge-number', {
+gsap.set('.challenge-row .challenge-number', {
     opacity: 0,
     scale: 0.5,
     y: 50
 });
-gsap.set('.challenge-tags span', {
+gsap.set('.challenge-row .challenge-tags span', {
     opacity: 0,
     y: 20,
     scale: 0.8
 });
-gsap.set('.challenge-description', {
+gsap.set('.challenge-row .challenge-description', {
     opacity: 0,
     y: 30,
     filter: 'blur(5px)'
 });
-gsap.set('.meta-item', {
+gsap.set('.challenge-row .meta-item', {
     opacity: 0,
     x: -30
 });
@@ -2525,204 +2573,6 @@ gsap.to('.quote-marks', {
     yoyo: true,
     ease: 'sine.inOut'
 });
-
-// ============================================
-// LOGIN SECTION - CINEMATIC 3D ANIMATION
-// ============================================
-
-const loginSection = document.querySelector('.login-section');
-
-if (loginSection) {
-    gsap.set(loginSection, {
-        perspective: 1500
-    });
-
-    // Create master timeline for login section
-    const loginTl = gsap.timeline({
-        scrollTrigger: {
-            trigger: '.login-section',
-            start: 'top 75%',
-            end: 'center center',
-            toggleActions: 'play none none reverse'
-        }
-    });
-
-    // Vecna silhouette - dramatic emergence from darkness
-    loginTl.from('.vecna-silhouette', {
-        scale: 0.3,
-        rotationY: 180,
-        z: -800,
-        opacity: 0,
-        filter: 'blur(30px) brightness(3)',
-        duration: 1.5,
-        ease: 'power4.out'
-    });
-
-    // Vecna glow pulse
-    loginTl.to('.vecna-silhouette', {
-        boxShadow: '0 0 100px rgba(229, 9, 20, 0.8), 0 0 200px rgba(229, 9, 20, 0.4)',
-        duration: 0.5,
-        ease: 'power2.out'
-    }, '-=0.5');
-
-    loginTl.to('.vecna-silhouette', {
-        boxShadow: '0 0 50px rgba(229, 9, 20, 0.3)',
-        duration: 0.8,
-        ease: 'power2.inOut'
-    });
-
-    // Clock text - glitch entrance
-    loginTl.from('.clock-text', {
-        y: 50,
-        opacity: 0,
-        skewX: 20,
-        filter: 'blur(10px)',
-        duration: 0.8,
-        ease: 'power3.out'
-    }, '-=1');
-
-    // Clock glitch effect
-    loginTl.to('.clock-text', {
-        textShadow: '-3px 0 0 rgba(0, 255, 255, 0.7), 3px 0 0 rgba(255, 0, 100, 0.7)',
-        x: 5,
-        duration: 0.05
-    }, '-=0.3');
-
-    loginTl.to('.clock-text', {
-        textShadow: '3px 0 0 rgba(0, 255, 255, 0.5), -3px 0 0 rgba(255, 0, 100, 0.5)',
-        x: -3,
-        duration: 0.05
-    });
-
-    loginTl.to('.clock-text', {
-        textShadow: '0 0 20px rgba(229, 9, 20, 0.5)',
-        x: 0,
-        duration: 0.1
-    });
-
-    // Login form container - 3D slide in
-    loginTl.from('.login-form-container', {
-        x: 200,
-        rotationY: -45,
-        z: -400,
-        opacity: 0,
-        filter: 'blur(15px)',
-        duration: 1.2,
-        ease: 'power3.out'
-    }, '-=1.2');
-
-    // Login title - dramatic entrance
-    loginTl.from('.login-title', {
-        y: -50,
-        rotationX: 45,
-        opacity: 0,
-        filter: 'blur(10px)',
-        duration: 0.8,
-        ease: 'power3.out'
-    }, '-=0.8');
-
-    // Title glow
-    loginTl.to('.login-title', {
-        textShadow: '0 0 50px rgba(229, 9, 20, 0.6)',
-        duration: 0.3
-    }, '-=0.3');
-
-    loginTl.to('.login-title', {
-        textShadow: '0 0 20px rgba(229, 9, 20, 0.2)',
-        duration: 0.5
-    });
-
-    // Input groups - staggered 3D entrance
-    loginTl.from('.input-group', {
-        x: 100,
-        rotationY: -30,
-        opacity: 0,
-        filter: 'blur(5px)',
-        duration: 0.6,
-        stagger: 0.15,
-        ease: 'power3.out'
-    }, '-=0.5');
-
-    // Submit button - dramatic pop
-    loginTl.from('.submit-btn', {
-        scale: 0,
-        rotationX: -90,
-        z: -200,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'back.out(2)'
-    }, '-=0.3');
-
-    // Button glow
-    loginTl.to('.submit-btn', {
-        boxShadow: '0 0 50px rgba(229, 9, 20, 0.8), 0 0 100px rgba(229, 9, 20, 0.4)',
-        duration: 0.3
-    }, '-=0.2');
-
-    loginTl.to('.submit-btn', {
-        boxShadow: '0 0 20px rgba(229, 9, 20, 0.3)',
-        duration: 0.5
-    });
-
-    // Login hint - fade in
-    loginTl.from('.login-hint', {
-        y: 20,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.out'
-    }, '-=0.3');
-}
-
-// Vecna continuous floating animation
-gsap.to('.vecna-silhouette', {
-    y: -15,
-    rotationY: 5,
-    duration: 4,
-    repeat: -1,
-    yoyo: true,
-    ease: 'sine.inOut'
-});
-
-// Clock text flicker
-setInterval(() => {
-    const clockText = document.querySelector('.clock-text');
-    if (clockText && Math.random() > 0.7) {
-        gsap.to(clockText, {
-            opacity: 0.3,
-            duration: 0.05,
-            onComplete: () => {
-                gsap.to(clockText, {
-                    opacity: 1,
-                    duration: 0.05
-                });
-            }
-        });
-    }
-}, 2000);
-
-// Login form hover effects
-const loginFormContainer = document.querySelector('.login-form-container');
-if (loginFormContainer) {
-    loginFormContainer.addEventListener('mouseenter', () => {
-        gsap.to(loginFormContainer, {
-            z: 30,
-            rotationY: 3,
-            boxShadow: '0 30px 60px rgba(0, 0, 0, 0.5), 0 0 80px rgba(229, 9, 20, 0.2)',
-            duration: 0.5,
-            ease: 'power2.out'
-        });
-    });
-
-    loginFormContainer.addEventListener('mouseleave', () => {
-        gsap.to(loginFormContainer, {
-            z: 0,
-            rotationY: 0,
-            boxShadow: '0 0 0 transparent',
-            duration: 0.5,
-            ease: 'power2.out'
-        });
-    });
-}
 
 // ============================================
 // SPONSORS SECTION - ANIMATION
@@ -4291,481 +4141,151 @@ window.addEventListener('load', () => {
 
 
 // ============================================
-// CIRCULAR 3D GALLERY - WebGL with OGL
+// MOBILE MENU TOGGLE
 // ============================================
 
-const CircularGallery = {
-    container: null,
-    renderer: null,
-    gl: null,
-    camera: null,
-    scene: null,
-    planeGeometry: null,
-    medias: [],
-    mediasImages: [],
-    screen: { width: 0, height: 0 },
-    viewport: { width: 0, height: 0 },
-    scroll: { ease: 0.05, current: 0, target: 0, last: 0, position: 0 },
-    isDown: false,
-    start: 0,
-    raf: null,
-    
-    // Auto-scroll settings
-    autoScroll: true,
-    autoScrollSpeed: 0.5, // Speed of auto-scroll
-    autoScrollPaused: false,
-    
-    // Gallery items - your images from gallery folder
-    items: [
-        { image: 'gallery/IMG-20250919-WA0115.png', text: '' },
-        { image: 'gallery/IMG-20250919-WA0116.png', text: '' },
-        { image: 'gallery/IMG-20250919-WA0117.png', text: '' },
-        { image: 'gallery/IMG-20250919-WA0123.png', text: '' },
-        { image: 'gallery/WhatsApp Image 2026-01-12 at 13.21.16.jpeg', text: '' },
-        { image: 'gallery/WhatsApp Image 2026-01-12 at 13.21.18.jpeg', text: '' }
-    ],
-    
-    // Settings
-    bend: -1,
-    textColor: '#e50914',
-    borderRadius: 0.05,
-    font: 'bold 24px "ITC Benguiat", Cinzel, serif',
-    scrollSpeed: 2,
-    
-    init() {
-        this.container = document.getElementById('circularGallery');
-        
-        // Check for OGL - it might be on window.OGL or just OGL
-        const oglLib = window.OGL || (typeof OGL !== 'undefined' ? OGL : null);
-        
-        if (!this.container) {
-            console.log('Circular gallery: container not found');
-            return;
-        }
-        
-        if (!oglLib) {
-            console.log('Circular gallery: OGL library not loaded, falling back to CSS gallery');
-            this.createFallbackGallery();
-            return;
-        }
-        
-        this.OGL = oglLib;
-        
-        try {
-            this.createRenderer();
-            this.createCamera();
-            this.createScene();
-            this.onResize();
-            this.createGeometry();
-            this.createMedias();
-            this.update();
-            this.addEventListeners();
-            console.log('Circular gallery initialized successfully');
-        } catch (e) {
-            console.error('Circular gallery error:', e);
-            this.createFallbackGallery();
-        }
-    },
-    
-    createFallbackGallery() {
-        // Create a simple CSS-based horizontal scroll gallery as fallback
-        this.container.innerHTML = `
-            <div class="fallback-gallery">
-                ${this.items.map(item => `
-                    <div class="fallback-gallery-item">
-                        <img src="${item.image}" alt="Gallery image">
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    },
-    
-    createRenderer() {
-        const { Renderer } = this.OGL;
-        this.renderer = new Renderer({
-            alpha: true,
-            antialias: true,
-            dpr: Math.min(window.devicePixelRatio || 1, 2)
-        });
-        this.gl = this.renderer.gl;
-        this.gl.clearColor(0, 0, 0, 0);
-        this.container.appendChild(this.gl.canvas);
-    },
-    
-    createCamera() {
-        const { Camera } = this.OGL;
-        this.camera = new Camera(this.gl);
-        this.camera.fov = 45;
-        this.camera.position.z = 20;
-    },
-    
-    createScene() {
-        const { Transform } = this.OGL;
-        this.scene = new Transform();
-    },
-    
-    createGeometry() {
-        const { Plane } = this.OGL;
-        this.planeGeometry = new Plane(this.gl, {
-            heightSegments: 50,
-            widthSegments: 100
-        });
-    },
-    
-    createMedias() {
-        // Duplicate items for infinite scroll
-        this.mediasImages = [...this.items, ...this.items];
-        
-        this.medias = this.mediasImages.map((data, index) => {
-            return this.createMedia({
-                image: data.image,
-                text: data.text,
-                index,
-                length: this.mediasImages.length
-            });
-        });
-    },
-    
-    createMedia({ image, text, index, length }) {
-        const { Mesh, Program, Texture } = this.OGL;
-        
-        const media = {
-            extra: 0,
-            index,
-            length,
-            x: 0,
-            width: 0,
-            widthTotal: 0,
-            scale: 1,
-            padding: 2,
-            isBefore: false,
-            isAfter: false,
-            speed: 0
-        };
-        
-        // Create texture
-        const texture = new Texture(this.gl, { generateMipmaps: true });
-        
-        // Create program/shader
-        media.program = new Program(this.gl, {
-            depthTest: false,
-            depthWrite: false,
-            vertex: `
-                precision highp float;
-                attribute vec3 position;
-                attribute vec2 uv;
-                uniform mat4 modelViewMatrix;
-                uniform mat4 projectionMatrix;
-                uniform float uTime;
-                uniform float uSpeed;
-                varying vec2 vUv;
-                void main() {
-                    vUv = uv;
-                    vec3 p = position;
-                    p.z = (sin(p.x * 4.0 + uTime) * 1.5 + cos(p.y * 2.0 + uTime) * 1.5) * (0.1 + uSpeed * 0.5);
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-                }
-            `,
-            fragment: `
-                precision highp float;
-                uniform vec2 uImageSizes;
-                uniform vec2 uPlaneSizes;
-                uniform sampler2D tMap;
-                uniform float uBorderRadius;
-                varying vec2 vUv;
-                
-                float roundedBoxSDF(vec2 p, vec2 b, float r) {
-                    vec2 d = abs(p) - b;
-                    return length(max(d, vec2(0.0))) + min(max(d.x, d.y), 0.0) - r;
-                }
-                
-                void main() {
-                    vec2 ratio = vec2(
-                        min((uPlaneSizes.x / uPlaneSizes.y) / (uImageSizes.x / uImageSizes.y), 1.0),
-                        min((uPlaneSizes.y / uPlaneSizes.x) / (uImageSizes.y / uImageSizes.x), 1.0)
-                    );
-                    vec2 uv = vec2(
-                        vUv.x * ratio.x + (1.0 - ratio.x) * 0.5,
-                        vUv.y * ratio.y + (1.0 - ratio.y) * 0.5
-                    );
-                    vec4 color = texture2D(tMap, uv);
-                    float d = roundedBoxSDF(vUv - 0.5, vec2(0.5 - uBorderRadius), uBorderRadius);
-                    float edgeSmooth = 0.002;
-                    float alpha = 1.0 - smoothstep(-edgeSmooth, edgeSmooth, d);
-                    gl_FragColor = vec4(color.rgb, alpha);
-                }
-            `,
-            uniforms: {
-                tMap: { value: texture },
-                uPlaneSizes: { value: [0, 0] },
-                uImageSizes: { value: [0, 0] },
-                uSpeed: { value: 0 },
-                uTime: { value: 100 * Math.random() },
-                uBorderRadius: { value: this.borderRadius }
-            },
-            transparent: true
-        });
-        
-        // Load image
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.src = image;
-        img.onload = () => {
-            texture.image = img;
-            media.program.uniforms.uImageSizes.value = [img.naturalWidth, img.naturalHeight];
-        };
-        
-        // Create mesh
-        media.plane = new Mesh(this.gl, {
-            geometry: this.planeGeometry,
-            program: media.program
-        });
-        media.plane.setParent(this.scene);
-        
-        // Create title
-        this.createTitle(media, text);
-        
-        // Initial resize
-        this.resizeMedia(media);
-        
-        return media;
-    },
-    
-    createTitle(media, text) {
-        const { Mesh, Plane, Program, Texture } = this.OGL;
-        
-        // Create text texture
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        context.font = this.font;
-        const metrics = context.measureText(text);
-        const textWidth = Math.ceil(metrics.width);
-        const textHeight = Math.ceil(parseInt(this.font, 10) * 1.2);
-        canvas.width = textWidth + 20;
-        canvas.height = textHeight + 20;
-        context.font = this.font;
-        context.fillStyle = this.textColor;
-        context.textBaseline = 'middle';
-        context.textAlign = 'center';
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.fillText(text, canvas.width / 2, canvas.height / 2);
-        
-        const texture = new Texture(this.gl, { generateMipmaps: false });
-        texture.image = canvas;
-        
-        const geometry = new Plane(this.gl);
-        const program = new Program(this.gl, {
-            vertex: `
-                attribute vec3 position;
-                attribute vec2 uv;
-                uniform mat4 modelViewMatrix;
-                uniform mat4 projectionMatrix;
-                varying vec2 vUv;
-                void main() {
-                    vUv = uv;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragment: `
-                precision highp float;
-                uniform sampler2D tMap;
-                varying vec2 vUv;
-                void main() {
-                    vec4 color = texture2D(tMap, vUv);
-                    if (color.a < 0.1) discard;
-                    gl_FragColor = color;
-                }
-            `,
-            uniforms: { tMap: { value: texture } },
-            transparent: true
-        });
-        
-        media.titleMesh = new Mesh(this.gl, { geometry, program });
-        const aspect = canvas.width / canvas.height;
-        const titleHeight = media.plane.scale.y * 0.15;
-        const titleWidth = titleHeight * aspect;
-        media.titleMesh.scale.set(titleWidth, titleHeight, 1);
-        media.titleMesh.position.y = -media.plane.scale.y * 0.5 - titleHeight * 0.5 - 0.05;
-        media.titleMesh.setParent(media.plane);
-    },
-    
-    resizeMedia(media) {
-        media.scale = this.screen.height / 1500;
-        media.plane.scale.y = (this.viewport.height * (900 * media.scale)) / this.screen.height;
-        media.plane.scale.x = (this.viewport.width * (700 * media.scale)) / this.screen.width;
-        media.program.uniforms.uPlaneSizes.value = [media.plane.scale.x, media.plane.scale.y];
-        media.padding = 2;
-        media.width = media.plane.scale.x + media.padding;
-        media.widthTotal = media.width * media.length;
-        media.x = media.width * media.index;
-    },
-    
-    updateMedia(media, direction) {
-        media.plane.position.x = media.x - this.scroll.current - media.extra;
-        const x = media.plane.position.x;
-        const H = this.viewport.width / 2;
-        
-        if (this.bend === 0) {
-            media.plane.position.y = 0;
-            media.plane.rotation.z = 0;
-        } else {
-            const B_abs = Math.abs(this.bend);
-            const R = (H * H + B_abs * B_abs) / (2 * B_abs);
-            const effectiveX = Math.min(Math.abs(x), H);
-            const arc = R - Math.sqrt(R * R - effectiveX * effectiveX);
-            
-            if (this.bend > 0) {
-                media.plane.position.y = -arc;
-                media.plane.rotation.z = -Math.sign(x) * Math.asin(effectiveX / R);
-            } else {
-                media.plane.position.y = arc;
-                media.plane.rotation.z = Math.sign(x) * Math.asin(effectiveX / R);
-            }
-        }
-        
-        media.speed = this.scroll.current - this.scroll.last;
-        media.program.uniforms.uTime.value += 0.04;
-        media.program.uniforms.uSpeed.value = media.speed;
-        
-        const planeOffset = media.plane.scale.x / 2;
-        const viewportOffset = this.viewport.width / 2;
-        media.isBefore = media.plane.position.x + planeOffset < -viewportOffset;
-        media.isAfter = media.plane.position.x - planeOffset > viewportOffset;
-        
-        if (direction === 'right' && media.isBefore) {
-            media.extra -= media.widthTotal;
-            media.isBefore = media.isAfter = false;
-        }
-        if (direction === 'left' && media.isAfter) {
-            media.extra += media.widthTotal;
-            media.isBefore = media.isAfter = false;
-        }
-    },
-    
-    lerp(p1, p2, t) {
-        return p1 + (p2 - p1) * t;
-    },
-    
-    onTouchDown(e) {
-        if (!this.isInView()) return;
-        this.isDown = true;
-        this.scroll.position = this.scroll.current;
-        this.start = e.touches ? e.touches[0].clientX : e.clientX;
-    },
-    
-    onTouchMove(e) {
-        if (!this.isDown) return;
-        const x = e.touches ? e.touches[0].clientX : e.clientX;
-        const distance = (this.start - x) * (this.scrollSpeed * 0.025);
-        this.scroll.target = this.scroll.position + distance;
-    },
-    
-    onTouchUp() {
-        this.isDown = false;
-        this.onCheck();
-    },
-    
-    onWheel(e) {
-        if (!this.isInView()) return;
-        const delta = e.deltaY || e.wheelDelta || e.detail;
-        this.scroll.target += (delta > 0 ? this.scrollSpeed : -this.scrollSpeed) * 0.2;
-        clearTimeout(this.checkTimeout);
-        this.checkTimeout = setTimeout(() => this.onCheck(), 200);
-    },
-    
-    onCheck() {
-        if (!this.medias || !this.medias[0]) return;
-        const width = this.medias[0].width;
-        const itemIndex = Math.round(Math.abs(this.scroll.target) / width);
-        const item = width * itemIndex;
-        this.scroll.target = this.scroll.target < 0 ? -item : item;
-    },
-    
-    isInView() {
-        if (!this.container) return false;
-        const rect = this.container.getBoundingClientRect();
-        return rect.top < window.innerHeight && rect.bottom > 0;
-    },
-    
-    onResize() {
-        this.screen = {
-            width: this.container.clientWidth,
-            height: this.container.clientHeight
-        };
-        
-        this.renderer.setSize(this.screen.width, this.screen.height);
-        this.camera.perspective({ aspect: this.screen.width / this.screen.height });
-        
-        const fov = (this.camera.fov * Math.PI) / 180;
-        const height = 2 * Math.tan(fov / 2) * this.camera.position.z;
-        const width = height * this.camera.aspect;
-        this.viewport = { width, height };
-        
-        if (this.medias) {
-            this.medias.forEach(media => {
-                this.resizeMedia(media);
-            });
-        }
-    },
-    
-    update() {
-        // Auto-scroll when enabled and not paused by user interaction
-        if (this.autoScroll && !this.autoScrollPaused && !this.isDown) {
-            this.scroll.target += this.autoScrollSpeed;
-        }
-        
-        this.scroll.current = this.lerp(this.scroll.current, this.scroll.target, this.scroll.ease);
-        const direction = this.scroll.current > this.scroll.last ? 'right' : 'left';
-        
-        if (this.medias) {
-            this.medias.forEach(media => this.updateMedia(media, direction));
-        }
-        
-        this.renderer.render({ scene: this.scene, camera: this.camera });
-        this.scroll.last = this.scroll.current;
-        this.raf = window.requestAnimationFrame(() => this.update());
-    },
-    
-    addEventListeners() {
-        window.addEventListener('resize', () => this.onResize());
-        
-        // Only capture wheel events when gallery is in view
-        this.container.addEventListener('wheel', (e) => {
-            if (this.isInView()) {
-                e.preventDefault();
-                this.onWheel(e);
-            }
-        }, { passive: false });
-        
-        // Pause auto-scroll on hover
-        this.container.addEventListener('mouseenter', () => {
-            this.autoScrollPaused = true;
-        });
-        this.container.addEventListener('mouseleave', () => {
-            this.autoScrollPaused = false;
-            this.onTouchUp();
-        });
-        
-        this.container.addEventListener('mousedown', (e) => this.onTouchDown(e));
-        this.container.addEventListener('mousemove', (e) => this.onTouchMove(e));
-        this.container.addEventListener('mouseup', () => this.onTouchUp());
-        
-        this.container.addEventListener('touchstart', (e) => this.onTouchDown(e));
-        this.container.addEventListener('touchmove', (e) => this.onTouchMove(e));
-        this.container.addEventListener('touchend', () => this.onTouchUp());
-    },
-    
-    destroy() {
-        window.cancelAnimationFrame(this.raf);
-        if (this.renderer && this.renderer.gl && this.renderer.gl.canvas.parentNode) {
-            this.renderer.gl.canvas.parentNode.removeChild(this.renderer.gl.canvas);
-        }
-    }
-};
+const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+const mobileNavLinks = document.getElementById('navLinks');
 
-// Initialize circular gallery when DOM is ready
+if (mobileMenuToggle && mobileNavLinks) {
+    mobileMenuToggle.addEventListener('click', () => {
+        mobileMenuToggle.classList.toggle('active');
+        mobileNavLinks.classList.toggle('active');
+        document.body.style.overflow = mobileNavLinks.classList.contains('active') ? 'hidden' : '';
+    });
+    
+    // Close menu when clicking a link
+    mobileNavLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenuToggle.classList.remove('active');
+            mobileNavLinks.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    });
+    
+    // Close menu on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mobileNavLinks.classList.contains('active')) {
+            mobileMenuToggle.classList.remove('active');
+            mobileNavLinks.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+}
+
+
+// ============================================
+// SKELETON LOADING & IMAGE OPTIMIZATION
+// ============================================
+
+// Add skeleton loading to gallery items
+function initSkeletonLoading() {
+    // Gallery images
+    const galleryItems = document.querySelectorAll('.gallery-scroll-item');
+    galleryItems.forEach(item => {
+        item.classList.add('skeleton-loading');
+        const img = item.querySelector('img');
+        if (img) {
+            if (img.complete) {
+                item.classList.remove('skeleton-loading');
+            } else {
+                img.addEventListener('load', () => {
+                    item.classList.remove('skeleton-loading');
+                });
+            }
+        }
+    });
+    
+    // Challenge background images
+    const challengeImages = document.querySelectorAll('.challenge-bg-img');
+    challengeImages.forEach(img => {
+        img.classList.add('loading');
+        if (img.complete) {
+            img.classList.remove('loading');
+        } else {
+            img.addEventListener('load', () => {
+                img.classList.remove('loading');
+            });
+        }
+    });
+}
+
+// Lazy load images that are not in viewport
+function initLazyLoading() {
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                    }
+                    observer.unobserve(img);
+                }
+            });
+        }, {
+            rootMargin: '100px 0px',
+            threshold: 0.1
+        });
+        
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+}
+
+// Optimize scroll performance
+function optimizeScrollPerformance() {
+    let ticking = false;
+    
+    // Throttle scroll events
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+    
+    // Disable pointer events during scroll for better performance
+    let scrollTimeout;
+    window.addEventListener('scroll', () => {
+        document.body.style.pointerEvents = 'none';
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            document.body.style.pointerEvents = '';
+        }, 100);
+    }, { passive: true });
+}
+
+// Initialize optimizations after DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Wait for main content to load
     setTimeout(() => {
-        CircularGallery.init();
-    }, 1000);
+        initSkeletonLoading();
+        initLazyLoading();
+        optimizeScrollPerformance();
+    }, 100);
 });
+
+// Preconnect to external resources
+function addPreconnects() {
+    const preconnects = [
+        'https://fonts.googleapis.com',
+        'https://fonts.gstatic.com',
+        'https://fonts.cdnfonts.com'
+    ];
+    
+    preconnects.forEach(url => {
+        const link = document.createElement('link');
+        link.rel = 'preconnect';
+        link.href = url;
+        link.crossOrigin = 'anonymous';
+        document.head.appendChild(link);
+    });
+}
+
+// Run preconnects immediately
+addPreconnects();
