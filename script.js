@@ -7,6 +7,34 @@
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 // ============================================
+// PERFORMANCE UTILITIES
+// ============================================
+
+// Throttle function for scroll events
+const throttle = (func, limit) => {
+    let inThrottle;
+    return function(...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+};
+
+// Debounce function for resize events
+const debounce = (func, wait) => {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+};
+
+// Request Idle Callback polyfill
+const requestIdleCallback = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+
+// ============================================
 // GLOBAL IMAGE PRELOADER - Load all images during loading screen
 // ============================================
 
@@ -28,7 +56,13 @@ const ImagePreloader = {
         'gallery/IMG-20250919-WA0117.png',
         'gallery/IMG-20250919-WA0123.png',
         'gallery/WhatsApp Image 2026-01-12 at 13.21.16.jpeg',
-        'gallery/WhatsApp Image 2026-01-12 at 13.21.18.jpeg'
+        'gallery/WhatsApp Image 2026-01-12 at 13.21.18.jpeg',
+        // Team photos
+        'Team/Sunidhi.jpeg',
+        'Team/Prathmesh.jpeg',
+        'Team/Mahek.jpg',
+        'Team/Aswin.jpeg',
+        'Team/Jash.jpeg'
     ],
     
     loadedImages: [],
@@ -47,27 +81,39 @@ const ImagePreloader = {
                 return;
             }
             
-            this.imagesToLoad.forEach(src => {
-                const img = new Image();
-                img.src = src;
-                
-                img.onload = () => {
-                    this.loadedCount++;
-                    this.loadedImages.push(img);
-                    if (this.loadedCount >= this.totalImages) {
-                        resolve();
-                    }
-                };
-                
-                img.onerror = () => {
-                    this.loadedCount++;
-                    console.warn(`Failed to preload: ${src}`);
-                    if (this.loadedCount >= this.totalImages) {
-                        resolve();
-                    }
-                };
+            // Use intersection observer for lazy loading non-critical images
+            const criticalImages = this.imagesToLoad.slice(0, 3); // First 3 are critical
+            const deferredImages = this.imagesToLoad.slice(3);
+            
+            // Load critical images first
+            criticalImages.forEach(src => this.loadImage(src, resolve));
+            
+            // Defer non-critical images
+            requestIdleCallback(() => {
+                deferredImages.forEach(src => this.loadImage(src, resolve));
             });
         });
+    },
+    
+    loadImage(src, resolve) {
+        const img = new Image();
+        img.src = src;
+        
+        img.onload = () => {
+            this.loadedCount++;
+            this.loadedImages.push(img);
+            if (this.loadedCount >= this.totalImages) {
+                resolve();
+            }
+        };
+        
+        img.onerror = () => {
+            this.loadedCount++;
+            console.warn(`Failed to preload: ${src}`);
+            if (this.loadedCount >= this.totalImages) {
+                resolve();
+            }
+        };
     },
     
     getProgress() {
@@ -134,7 +180,8 @@ const ImageSequenceScroll = {
         };
         
         resize();
-        window.addEventListener('resize', resize);
+        // Debounce resize for better performance
+        window.addEventListener('resize', debounce(resize, 150));
     },
     
     getFramePath(index) {
@@ -367,12 +414,15 @@ function initScrollProgress() {
     const progressBar = document.getElementById('scrollProgress');
     if (!progressBar) return;
     
-    window.addEventListener('scroll', () => {
+    // Use throttled scroll handler for better performance
+    const updateProgress = throttle(() => {
         const scrollTop = window.scrollY;
         const docHeight = document.documentElement.scrollHeight - window.innerHeight;
         const scrollPercent = (scrollTop / docHeight) * 100;
         progressBar.style.width = scrollPercent + '%';
-    });
+    }, 16); // ~60fps
+    
+    window.addEventListener('scroll', updateProgress, { passive: true });
 }
 
 // Magnetic Effect for Elements
@@ -519,7 +569,8 @@ function initNavbarScroll() {
     let lastScroll = 0;
     const scrollThreshold = 100;
     
-    window.addEventListener('scroll', () => {
+    // Use throttled scroll handler for better performance
+    const handleNavbarScroll = throttle(() => {
         const currentScroll = window.scrollY;
         
         // Add scrolled class for background
@@ -537,7 +588,9 @@ function initNavbarScroll() {
         }
         
         lastScroll = currentScroll;
-    });
+    }, 16); // ~60fps
+    
+    window.addEventListener('scroll', handleNavbarScroll, { passive: true });
 }
 
 // Parallax Effect for Hero
@@ -854,16 +907,28 @@ function initSmoothScrollLinks() {
             const target = document.querySelector(href);
             
             if (target) {
+                // Close mobile menu if open
+                const navLinks = document.getElementById('navLinks');
+                const mobileToggle = document.getElementById('mobileMenuToggle');
+                if (navLinks && navLinks.classList.contains('active')) {
+                    navLinks.classList.remove('active');
+                    mobileToggle.classList.remove('active');
+                }
+                
                 // Update active state
                 document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
+                
+                // Calculate proper scroll position
+                // Account for any pinned elements by getting the actual element position
+                const targetRect = target.getBoundingClientRect();
+                const absoluteTop = targetRect.top + window.pageYOffset;
                 
                 // Scroll to target with proper offset
                 gsap.to(window, {
                     duration: 1,
                     scrollTo: {
-                        y: target,
-                        offsetY: navbarHeight + 20,
+                        y: absoluteTop - navbarHeight - 20,
                         autoKill: false
                     },
                     ease: 'power2.inOut'
@@ -872,26 +937,39 @@ function initSmoothScrollLinks() {
         });
     });
     
-    // Update active nav link on scroll
-    window.addEventListener('scroll', () => {
+    // Update active nav link on scroll - improved detection
+    const updateActiveLink = throttle(() => {
         const sections = document.querySelectorAll('section[id]');
-        const scrollPos = window.scrollY + navbarHeight + 100;
+        const scrollPos = window.scrollY;
+        const windowHeight = window.innerHeight;
+        
+        let currentSection = null;
         
         sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            const sectionId = section.getAttribute('id');
+            const rect = section.getBoundingClientRect();
+            const sectionTop = rect.top;
+            const sectionBottom = rect.bottom;
             
-            if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
-                document.querySelectorAll('.nav-links a').forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${sectionId}`) {
-                        link.classList.add('active');
-                    }
-                });
+            // Check if section is in viewport (at least 30% visible from top)
+            if (sectionTop <= windowHeight * 0.3 && sectionBottom > navbarHeight + 50) {
+                currentSection = section.getAttribute('id');
             }
         });
-    });
+        
+        if (currentSection) {
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${currentSection}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+    }, 50); // Update every 50ms for smoother highlighting
+    
+    window.addEventListener('scroll', updateActiveLink, { passive: true });
+    
+    // Initial call to set active state on page load
+    setTimeout(updateActiveLink, 200);
 }
 
 // Initialize all premium animations
@@ -3587,14 +3665,23 @@ function initEnhancedGSAPAnimations() {
         });
     }
 
-    // Team Section Animations
+    // Team Section Animations - Enhanced
     const teamSection = document.querySelector('.team-section');
     if (teamSection) {
-        // Title animation
+        // Set initial states for team members
+        gsap.set('.gsap-team', {
+            opacity: 0,
+            y: 80,
+            scale: 0.8,
+            rotateY: -15,
+            transformPerspective: 1000
+        });
+
+        // Title animation with glow effect
         gsap.to('.team-section .gsap-title', {
             opacity: 1,
             y: 0,
-            duration: 1,
+            duration: 1.2,
             ease: 'power3.out',
             scrollTrigger: {
                 trigger: '.team-section',
@@ -3608,7 +3695,7 @@ function initEnhancedGSAPAnimations() {
             opacity: 1,
             y: 0,
             duration: 0.8,
-            delay: 0.2,
+            delay: 0.3,
             ease: 'power3.out',
             scrollTrigger: {
                 trigger: '.team-section',
@@ -3617,19 +3704,51 @@ function initEnhancedGSAPAnimations() {
             }
         });
 
-        // Team members 3D flip animation
+        // Team members cinematic entrance with stagger
         gsap.to('.gsap-team', {
             opacity: 1,
             y: 0,
-            rotateX: 0,
-            duration: 0.8,
-            stagger: 0.15,
-            ease: 'back.out(1.2)',
+            scale: 1,
+            rotateY: 0,
+            duration: 1,
+            stagger: {
+                each: 0.12,
+                from: 'center'
+            },
+            ease: 'back.out(1.5)',
             scrollTrigger: {
                 trigger: '.team-grid',
                 start: 'top 85%',
                 toggleActions: 'play none none reverse'
             }
+        });
+
+        // Add hover sound effect simulation with scale
+        document.querySelectorAll('.member-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                gsap.to(card.querySelector('.member-photo'), {
+                    scale: 1.1,
+                    duration: 0.4,
+                    ease: 'back.out(2)'
+                });
+                gsap.to(card.querySelector('.member-glow'), {
+                    opacity: 1,
+                    scale: 1.2,
+                    duration: 0.3
+                });
+            });
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card.querySelector('.member-photo'), {
+                    scale: 1,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+                gsap.to(card.querySelector('.member-glow'), {
+                    opacity: 0,
+                    scale: 1,
+                    duration: 0.3
+                });
+            });
         });
     }
 
@@ -4239,7 +4358,7 @@ function initLazyLoading() {
 function optimizeScrollPerformance() {
     let ticking = false;
     
-    // Throttle scroll events
+    // Throttle scroll events using requestAnimationFrame
     window.addEventListener('scroll', () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
@@ -4251,13 +4370,28 @@ function optimizeScrollPerformance() {
     
     // Disable pointer events during scroll for better performance
     let scrollTimeout;
-    window.addEventListener('scroll', () => {
+    const handleScrollPointer = throttle(() => {
         document.body.style.pointerEvents = 'none';
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
             document.body.style.pointerEvents = '';
         }, 100);
-    }, { passive: true });
+    }, 50);
+    
+    window.addEventListener('scroll', handleScrollPointer, { passive: true });
+}
+
+// Pause animations when tab is not visible
+function initVisibilityOptimization() {
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            // Pause GSAP animations when tab is hidden
+            gsap.globalTimeline.pause();
+        } else {
+            // Resume when tab is visible
+            gsap.globalTimeline.resume();
+        }
+    });
 }
 
 // Initialize optimizations after DOM is ready
@@ -4267,25 +4401,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initSkeletonLoading();
         initLazyLoading();
         optimizeScrollPerformance();
+        initVisibilityOptimization();
     }, 100);
 });
 
-// Preconnect to external resources
-function addPreconnects() {
-    const preconnects = [
-        'https://fonts.googleapis.com',
-        'https://fonts.gstatic.com',
-        'https://fonts.cdnfonts.com'
-    ];
-    
-    preconnects.forEach(url => {
-        const link = document.createElement('link');
-        link.rel = 'preconnect';
-        link.href = url;
-        link.crossOrigin = 'anonymous';
-        document.head.appendChild(link);
-    });
-}
-
-// Run preconnects immediately
-addPreconnects();
+// Preconnects are now handled in HTML head for better performance

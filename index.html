@@ -4,13 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stranger Tech - The Upside Down Challenge</title>
+    
+    <!-- DNS Prefetch for external resources -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://fonts.cdnfonts.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Preconnect for faster font loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Special+Elite&family=Orbitron:wght@400;700&family=Cinzel:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="styles.css" as="style">
+    <link rel="preload" href="intro/WhatsApp Video 2026-01-12 at 11.20.37_005.png" as="image">
+    <link rel="preload" href="will1.webp" as="image">
+    
+    <!-- Fonts with display swap for better performance -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Special+Elite&family=Orbitron:wght@400;700&family=Cinzel:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <!-- ITC Benguiat Bold - The Official Stranger Things Font -->
-    <link href="https://fonts.cdnfonts.com/css/itc-benguiat" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/itc-benguiat" rel="stylesheet" media="print" onload="this.media='all'">
+    
+    <!-- Fallback for browsers without JS -->
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Special+Elite&family=Orbitron:wght@400;700&family=Cinzel:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+        <link href="https://fonts.cdnfonts.com/css/itc-benguiat" rel="stylesheet">
+    </noscript>
+    
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Critical CSS for above-the-fold content -->
+    <style>
+        /* Inline critical CSS for faster initial render */
+        body { margin: 0; background: #0a0a0a; color: #fff; overflow-x: hidden; }
+        .sequence-loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .loader-content { text-align: center; }
+        .loader-text { font-family: serif; font-size: 1.2rem; color: #e50914; letter-spacing: 4px; margin-bottom: 30px; }
+        .loader-bar-container { width: 300px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .loader-bar-fill { height: 100%; background: linear-gradient(90deg, #e50914, #ff4444); width: 0; transition: width 0.3s; }
+    </style>
 </head>
 <body>
     <!-- Scroll Progress Indicator -->
@@ -571,19 +604,16 @@
         </div>
         
         <div class="team-container">
-            <div class="team-grid">
+            <div class="team-grid team-grid-5">
                 <div class="team-member gsap-team" data-index="1">
                     <div class="member-card">
                         <div class="member-image">
-                            <div class="member-placeholder">
-                                <span class="member-initial">E</span>
-                            </div>
+                            <img src="Team/Sunidhi.jpeg" alt="Sunidhi Haware" class="member-photo" loading="lazy">
                             <div class="member-glow"></div>
                         </div>
                         <div class="member-info">
-                            <h3 class="member-name">Eleven</h3>
-                            <span class="member-role">Lead Organizer</span>
-                            <p class="member-quote">"I can do things."</p>
+                            <h3 class="member-name">Sunidhi Haware</h3>
+                            <span class="member-role">SRC President</span>
                         </div>
                         <div class="member-lights">
                             <span class="m-light"></span>
@@ -596,15 +626,12 @@
                 <div class="team-member gsap-team" data-index="2">
                     <div class="member-card">
                         <div class="member-image">
-                            <div class="member-placeholder">
-                                <span class="member-initial">M</span>
-                            </div>
+                            <img src="Team/Prathmesh.jpeg" alt="Prathmesh Raipurkar" class="member-photo" loading="lazy">
                             <div class="member-glow"></div>
                         </div>
                         <div class="member-info">
-                            <h3 class="member-name">Mike Wheeler</h3>
-                            <span class="member-role">Technical Lead</span>
-                            <p class="member-quote">"We never give up."</p>
+                            <h3 class="member-name">Prathmesh Raipurkar</h3>
+                            <span class="member-role">SRC Vice-President</span>
                         </div>
                         <div class="member-lights">
                             <span class="m-light"></span>
@@ -617,15 +644,12 @@
                 <div class="team-member gsap-team" data-index="3">
                     <div class="member-card">
                         <div class="member-image">
-                            <div class="member-placeholder">
-                                <span class="member-initial">D</span>
-                            </div>
+                            <img src="Team/Mahek.jpg" alt="Mahek Patel" class="member-photo" loading="lazy">
                             <div class="member-glow"></div>
                         </div>
                         <div class="member-info">
-                            <h3 class="member-name">Dustin Henderson</h3>
-                            <span class="member-role">Challenge Designer</span>
-                            <p class="member-quote">"She's our friend and she's crazy!"</p>
+                            <h3 class="member-name">Mahek Patel</h3>
+                            <span class="member-role">Event Coordinator</span>
                         </div>
                         <div class="member-lights">
                             <span class="m-light"></span>
@@ -638,15 +662,30 @@
                 <div class="team-member gsap-team" data-index="4">
                     <div class="member-card">
                         <div class="member-image">
-                            <div class="member-placeholder">
-                                <span class="member-initial">L</span>
-                            </div>
+                            <img src="Team/Aswin.jpeg" alt="Aswin Binu" class="member-photo" loading="lazy">
                             <div class="member-glow"></div>
                         </div>
                         <div class="member-info">
-                            <h3 class="member-name">Lucas Sinclair</h3>
-                            <span class="member-role">Event Coordinator</span>
-                            <p class="member-quote">"Always be prepared."</p>
+                            <h3 class="member-name">Aswin Binu</h3>
+                            <span class="member-role">Web Developer</span>
+                        </div>
+                        <div class="member-lights">
+                            <span class="m-light"></span>
+                            <span class="m-light"></span>
+                            <span class="m-light"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-member gsap-team" data-index="5">
+                    <div class="member-card">
+                        <div class="member-image">
+                            <img src="Team/Jash.jpeg" alt="Jash Chauhan" class="member-photo" loading="lazy">
+                            <div class="member-glow"></div>
+                        </div>
+                        <div class="member-info">
+                            <h3 class="member-name">Jash Chauhan</h3>
+                            <span class="member-role">Web Developer</span>
                         </div>
                         <div class="member-lights">
                             <span class="m-light"></span>
@@ -765,25 +804,26 @@
                 <div class="contact-card">
                     <div class="contact-icon">📍</div>
                     <h3>Location</h3>
-                    <p>Hawkins National Laboratory<br>CSI Department, Main Campus</p>
+                    <p>SIT Nagpur<br>Symbiosis Institute of Technology</p>
+                    <a href="https://maps.app.goo.gl/7iEiFqCYY373Bnfb8" target="_blank" rel="noopener noreferrer" class="map-link">View on Google Maps →</a>
+                </div>
+                
+                <div class="contact-card">
+                    <div class="contact-icon">👤</div>
+                    <h3>Event Coordinator</h3>
+                    <p>Mahek Patel<br>+91 95297 83646</p>
                 </div>
                 
                 <div class="contact-card">
                     <div class="contact-icon">📧</div>
                     <h3>Email</h3>
-                    <p>strangertech@csi.edu<br>support@strangertech.com</p>
-                </div>
-                
-                <div class="contact-card">
-                    <div class="contact-icon">📱</div>
-                    <h3>Phone</h3>
-                    <p>+91 98765 43210<br>+91 12345 67890</p>
+                    <p>enthusia@sitnagpur.siu.edu.in</p>
                 </div>
                 
                 <div class="contact-card">
                     <div class="contact-icon">🕐</div>
-                    <h3>Hours</h3>
-                    <p>Mon - Fri: 9AM - 6PM<br>Sat: 10AM - 4PM</p>
+                    <h3>Event Timing</h3>
+                    <p>10:00 AM - 5:00 PM<br>Full Day Event</p>
                 </div>
             </div>
             
@@ -792,25 +832,25 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="contactName">Your Name</label>
-                            <input type="text" id="contactName" name="name" placeholder="Mike Wheeler" required>
+                            <input type="text" id="contactName" name="name" placeholder="Enter your name" required>
                             <div class="input-line"></div>
                         </div>
                         <div class="form-group">
                             <label for="contactEmail">Email Address</label>
-                            <input type="email" id="contactEmail" name="email" placeholder="mike@hawkins.com" required>
+                            <input type="email" id="contactEmail" name="email" placeholder="Enter your email" required>
                             <div class="input-line"></div>
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label for="contactSubject">Subject</label>
-                        <input type="text" id="contactSubject" name="subject" placeholder="Question about the event">
+                        <input type="text" id="contactSubject" name="subject" placeholder="Enter subject">
                         <div class="input-line"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="contactMessage">Message</label>
-                        <textarea id="contactMessage" name="message" rows="5" placeholder="Tell us what's on your mind..." required></textarea>
+                        <textarea id="contactMessage" name="message" rows="5" placeholder="Enter your message..." required></textarea>
                         <div class="input-line"></div>
                     </div>
                     
@@ -1025,5 +1065,13 @@
     <!-- SplitType for text animations -->
     <script src="https://unpkg.com/split-type"></script>
     <script src="script.js"></script>
+    
+    <!-- Performance: Intersection Observer for lazy animations -->
+    <script>
+        // Disable animations for users who prefer reduced motion
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('reduce-motion');
+        }
+    </script>
 </body>
 </html>

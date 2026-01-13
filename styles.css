@@ -4,6 +4,67 @@
    ============================================ */
 
 /* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+/* GPU acceleration for animated elements */
+.challenge-bg-img,
+.gallery-scroll-track,
+.cursor,
+.cursor-dot,
+.particles,
+.red-cloud,
+.fire-reveal,
+.school-bus,
+.prize-card {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .gallery-scroll-track {
+        animation: none !important;
+    }
+    
+    .film-grain {
+        animation: none !important;
+    }
+}
+
+/* Content visibility for off-screen sections - excluding pinned sections */
+.challenge-page,
+.team-section,
+.faq-section,
+.contact-section,
+.gallery-section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 100vh;
+}
+
+/* Prize section needs special handling due to ScrollTrigger pinning */
+.prize-section {
+    contain: layout style;
+}
+
+/* Optimize font rendering */
+body {
+    text-rendering: optimizeSpeed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
    CINEMATIC INTRO SYSTEM - Stranger Things Style
    ============================================ */
 
@@ -3595,9 +3656,15 @@ body::after {
 
 .prize-section {
     position: relative;
-    overflow: visible;
-    background: transparent;
+    overflow: hidden;
+    background: #0a0a0a;
     z-index: 50;
+    min-height: 100vh;
+}
+
+/* GSAP creates a pin-spacer wrapper - ensure proper stacking */
+.pin-spacer {
+    z-index: 50 !important;
 }
 
 .prize-section::before {
@@ -3629,7 +3696,7 @@ body::after {
 }
 
 .prize-sticky-wrapper {
-    height: 100vh;
+    min-height: 100vh;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -3637,7 +3704,7 @@ body::after {
     align-items: center;
     padding: 100px 80px 60px 80px;
     overflow: hidden;
-    background: transparent;
+    background: #0a0a0a;
     position: relative;
     z-index: 50;
 }
@@ -6765,9 +6832,24 @@ body::after {
 
 .gallery-section {
     position: relative;
-    padding: 120px 5% 100px;
+    padding: 120px 5% 150px;
     overflow: hidden;
-    background: linear-gradient(180deg, rgba(10, 10, 10, 0.95) 0%, rgba(20, 10, 10, 0.95) 100%);
+    background: #0a0a0a;
+    z-index: 5;
+    isolation: isolate;
+}
+
+/* Ensure gallery section header is visible */
+.gallery-section .section-header {
+    position: relative;
+    z-index: 10;
+}
+
+.gallery-section .section-header .section-tag,
+.gallery-section .section-header .section-title,
+.gallery-section .section-header .section-subtitle {
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .gallery-section::before {
@@ -6778,7 +6860,7 @@ body::after {
     right: 0;
     height: 200px;
     background: linear-gradient(to bottom, #0a0a0a, transparent);
-    z-index: 1;
+    z-index: 2;
     pointer-events: none;
 }
 
@@ -6789,6 +6871,8 @@ body::after {
     overflow: hidden;
     margin-top: 60px;
     padding: 40px 0;
+    background: #0a0a0a;
+    z-index: 5;
 }
 
 .gallery-scroll-wrapper::before,
@@ -6880,7 +6964,7 @@ body::after {
     right: 0;
     height: 200px;
     background: linear-gradient(to bottom, transparent, #0a0a0a);
-    z-index: 1;
+    z-index: 2;
     pointer-events: none;
 }
 
@@ -7013,9 +7097,23 @@ body::after {
 
 .team-section {
     position: relative;
-    padding: 120px 5% 100px;
+    padding: 120px 5% 120px;
     overflow: hidden;
-    background: linear-gradient(180deg, rgba(20, 10, 10, 0.95) 0%, rgba(10, 10, 10, 0.95) 100%);
+    background: linear-gradient(180deg, #0a0a0a 0%, #0d0808 50%, #0a0a0a 100%);
+}
+
+/* Subtle red ambient glow */
+.team-section .section-header::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 300px;
+    background: radial-gradient(ellipse, rgba(229, 9, 20, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
 }
 
 .team-section::before {
@@ -7043,8 +7141,10 @@ body::after {
 }
 
 .team-container {
-    max-width: 1200px;
+    max-width: 1300px;
     margin: 60px auto 0;
+    position: relative;
+    z-index: 2;
 }
 
 .team-grid {
@@ -7053,48 +7153,128 @@ body::after {
     gap: 30px;
 }
 
+/* 5-member grid layout */
+.team-grid.team-grid-5 {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
 .team-member {
     position: relative;
 }
 
 .member-card {
-    background: rgba(20, 20, 20, 0.9);
-    border: 1px solid rgba(229, 9, 20, 0.2);
-    border-radius: 15px;
-    padding: 30px 20px;
+    background: linear-gradient(145deg, rgba(25, 25, 25, 0.95) 0%, rgba(15, 15, 15, 0.98) 100%);
+    border: 1px solid rgba(229, 9, 20, 0.3);
+    border-radius: 20px;
+    padding: 30px 20px 25px;
     text-align: center;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
     overflow: hidden;
+    height: 100%;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(10px);
 }
 
+/* Ensure all team members have equal height */
+.team-member {
+    display: flex;
+    perspective: 1000px;
+}
+
+.team-grid.team-grid-5 .member-card {
+    min-height: 280px;
+}
+
+/* Glowing border effect */
 .member-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: linear-gradient(135deg, transparent 0%, rgba(229, 9, 20, 0.5) 50%, transparent 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+/* Ambient glow effect */
+.member-card::after {
     content: '';
     position: absolute;
     top: -50%;
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(229, 9, 20, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(229, 9, 20, 0.15) 0%, transparent 60%);
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
 }
 
 .member-card:hover {
-    transform: translateY(-15px);
+    transform: translateY(-15px) scale(1.02);
     border-color: #e50914;
-    box-shadow: 0 25px 50px rgba(229, 9, 20, 0.3);
+    box-shadow: 
+        0 25px 60px rgba(229, 9, 20, 0.3),
+        0 0 40px rgba(229, 9, 20, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .member-card:hover::before {
     opacity: 1;
+    animation: borderGlow 2s linear infinite;
+}
+
+.member-card:hover::after {
+    opacity: 1;
+}
+
+@keyframes borderGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .member-image {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 110px;
+    height: 110px;
     margin: 0 auto 20px;
+}
+
+.member-photo {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center top;
+    border: 3px solid rgba(229, 9, 20, 0.8);
+    position: relative;
+    z-index: 1;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+}
+
+.member-card:hover .member-photo {
+    transform: scale(1.08);
+    border-color: #ff4444;
+    box-shadow: 
+        0 10px 30px rgba(229, 9, 20, 0.4),
+        0 0 20px rgba(229, 9, 20, 0.3);
 }
 
 .member-placeholder {
@@ -7122,12 +7302,13 @@ body::after {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 140px;
-    height: 140px;
+    width: 130px;
+    height: 130px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(229, 9, 20, 0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(229, 9, 20, 0.4) 0%, transparent 70%);
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.5s ease;
+    filter: blur(8px);
 }
 
 .member-card:hover .member-glow {
@@ -7135,26 +7316,50 @@ body::after {
     animation: pulseGlow 2s ease-in-out infinite;
 }
 
+@keyframes pulseGlow {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+}
+
 .member-info {
     position: relative;
     z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 5px;
 }
 
 .member-name {
     font-family: var(--stranger-font);
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     color: #fff;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     letter-spacing: 1px;
+    transition: all 0.3s ease;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.member-card:hover .member-name {
+    color: #fff;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
 .member-role {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     color: #e50914;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
+    min-height: 2.5em;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 10px rgba(229, 9, 20, 0.3);
+}
+
+.member-card:hover .member-role {
+    text-shadow: 0 0 15px rgba(229, 9, 20, 0.6);
 }
 
 .member-quote {
@@ -7167,29 +7372,37 @@ body::after {
 .member-lights {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 15px;
 }
 
 .member-lights .m-light {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: #e50914;
-    box-shadow: 0 0 10px #e50914;
-    animation: flickerLight 0.5s infinite;
+    box-shadow: 0 0 8px #e50914, 0 0 15px rgba(229, 9, 20, 0.5);
+    animation: flickerLight 1.5s ease-in-out infinite;
 }
 
 .member-lights .m-light:nth-child(2) {
     background: #33ff33;
-    box-shadow: 0 0 10px #33ff33;
-    animation-delay: 0.2s;
+    box-shadow: 0 0 8px #33ff33, 0 0 15px rgba(51, 255, 51, 0.5);
+    animation-delay: 0.3s;
 }
 
 .member-lights .m-light:nth-child(3) {
-    background: #3333ff;
-    box-shadow: 0 0 10px #3333ff;
-    animation-delay: 0.4s;
+    background: #4488ff;
+    box-shadow: 0 0 8px #4488ff, 0 0 15px rgba(68, 136, 255, 0.5);
+    animation-delay: 0.6s;
+}
+
+@keyframes flickerLight {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    25% { opacity: 0.6; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.1); }
+    75% { opacity: 0.8; transform: scale(0.95); }
 }
 
 .team-vines {
@@ -7235,14 +7448,22 @@ body::after {
     50% { transform: scaleY(1.2); opacity: 0.6; }
 }
 
+@media (max-width: 1200px) {
+    .team-grid.team-grid-5 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
 @media (max-width: 992px) {
-    .team-grid {
+    .team-grid,
+    .team-grid.team-grid-5 {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 576px) {
-    .team-grid {
+    .team-grid,
+    .team-grid.team-grid-5 {
         grid-template-columns: 1fr;
     }
 }
@@ -7554,6 +7775,21 @@ body::after {
     color: rgba(255, 255, 255, 0.7);
     font-size: 0.9rem;
     line-height: 1.6;
+}
+
+.contact-card .map-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #e50914;
+    font-size: 0.85rem;
+    text-decoration: none;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.contact-card .map-link:hover {
+    color: #ff4444;
+    text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
 }
 
 .contact-form-wrapper {
