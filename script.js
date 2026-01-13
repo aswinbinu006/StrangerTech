@@ -1,25 +1,40 @@
 /* ============================================
    STRANGER THINGS WEBSITE - GSAP ANIMATIONS
-   PREMIUM MULTI-MILLION DOLLAR ANIMATIONS
+   OPTIMIZED FOR PERFORMANCE & MOBILE
    ============================================ */
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 // ============================================
-// SCROLLTRIGGER CONFIGURATION - Fix glitches
+// SCROLLTRIGGER CONFIGURATION - OPTIMIZED
 // ============================================
 
 // Configure ScrollTrigger for better performance
 ScrollTrigger.config({
     limitCallbacks: true,
-    ignoreMobileResize: true
+    ignoreMobileResize: true,
+    autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load'
 });
 
-// Refresh ScrollTrigger on window load to fix position calculations
+// Detect mobile/touch devices
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+// Refresh ScrollTrigger on window load
 window.addEventListener('load', () => {
+    // Delay refresh to ensure all content is rendered
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            ScrollTrigger.refresh(true);
+        }, 100);
+    });
+});
+
+// Additional refresh for mobile devices after orientation change
+window.addEventListener('orientationchange', () => {
     setTimeout(() => {
-        ScrollTrigger.refresh();
+        ScrollTrigger.refresh(true);
     }, 500);
 });
 
@@ -29,26 +44,37 @@ window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
         ScrollTrigger.refresh();
-    }, 250);
-});
+    }, 200);
+}, { passive: true });
 
 // ============================================
-// PERFORMANCE UTILITIES
+// PERFORMANCE UTILITIES - OPTIMIZED
 // ============================================
 
-// Throttle function for scroll events
+// Throttle function with RAF for smooth animations
 const throttle = (func, limit) => {
     let inThrottle;
+    let lastFunc;
+    let lastRan;
     return function(...args) {
         if (!inThrottle) {
             func.apply(this, args);
+            lastRan = Date.now();
             inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
+            setTimeout(() => {
+                inThrottle = false;
+                if (lastFunc) {
+                    lastFunc();
+                    lastFunc = null;
+                }
+            }, limit);
+        } else {
+            lastFunc = () => func.apply(this, args);
         }
     };
 };
 
-// Debounce function for resize events
+// Debounce function
 const debounce = (func, wait) => {
     let timeout;
     return function(...args) {
@@ -60,30 +86,36 @@ const debounce = (func, wait) => {
 // Request Idle Callback polyfill
 const requestIdleCallback = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
 
+// Check if element is in viewport
+const isInViewport = (el) => {
+    const rect = el.getBoundingClientRect();
+    return (
+        rect.top < window.innerHeight &&
+        rect.bottom > 0 &&
+        rect.left < window.innerWidth &&
+        rect.right > 0
+    );
+};
+
 // ============================================
-// GLOBAL IMAGE PRELOADER - Load all images during loading screen
+// GLOBAL IMAGE PRELOADER - OPTIMIZED
 // ============================================
 
 const ImagePreloader = {
-    // All images to preload
     imagesToLoad: [
-        // Challenge images from Challenges Photos folder
         'Challenges Photos/Challenge 1 (1).jpeg',
         'Challenges Photos/Challenge 2.jpeg',
         'Challenges Photos/Challenge 3.jpg',
         'Challenges Photos/Challenge 4.jpeg',
         'Challenges Photos/Challenge 5.jpeg',
-        // About section
         'will1.webp',
         'v1.png',
-        // Gallery images
         'gallery/IMG-20250919-WA0115.png',
         'gallery/IMG-20250919-WA0116.png',
         'gallery/IMG-20250919-WA0117.png',
         'gallery/IMG-20250919-WA0123.png',
         'gallery/WhatsApp Image 2026-01-12 at 13.21.16.jpeg',
         'gallery/WhatsApp Image 2026-01-12 at 13.21.18.jpeg',
-        // Team photos
         'Team/Sunidhi.jpeg',
         'Team/Prathmesh.jpeg',
         'Team/Mahek.jpg',
@@ -107,11 +139,11 @@ const ImagePreloader = {
                 return;
             }
             
-            // Use intersection observer for lazy loading non-critical images
-            const criticalImages = this.imagesToLoad.slice(0, 3); // First 3 are critical
-            const deferredImages = this.imagesToLoad.slice(3);
+            // Load critical images first (above the fold)
+            const criticalImages = this.imagesToLoad.slice(0, 2);
+            const deferredImages = this.imagesToLoad.slice(2);
             
-            // Load critical images first
+            // Load critical images immediately
             criticalImages.forEach(src => this.loadImage(src, resolve));
             
             // Defer non-critical images
@@ -123,9 +155,10 @@ const ImagePreloader = {
     
     loadImage(src, resolve) {
         const img = new Image();
+        img.decoding = 'async';
         img.src = src;
         
-        img.onload = () => {
+        const onComplete = () => {
             this.loadedCount++;
             this.loadedImages.push(img);
             if (this.loadedCount >= this.totalImages) {
@@ -133,13 +166,8 @@ const ImagePreloader = {
             }
         };
         
-        img.onerror = () => {
-            this.loadedCount++;
-            console.warn(`Failed to preload: ${src}`);
-            if (this.loadedCount >= this.totalImages) {
-                resolve();
-            }
-        };
+        img.onload = onComplete;
+        img.onerror = onComplete;
     },
     
     getProgress() {
@@ -427,9 +455,7 @@ const ImageSequenceScroll = {
 };
 
 // Initialize image sequence on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    ImageSequenceScroll.init();
-});
+// Consolidated into main init function below
 
 // ============================================
 // PREMIUM ANIMATION SYSTEM
@@ -700,33 +726,8 @@ function initSectionAnimations() {
     // The HTML now uses full-page .challenge-page sections
     // Challenge page animations are handled by initChallengePageAnimations()
     
-    // Prize cards pop-up animation - more dramatic
-    const prizeCards = document.querySelectorAll('.prize-card');
-    
-    prizeCards.forEach((card, index) => {
-        // Set initial state
-        gsap.set(card, { 
-            y: 120, 
-            opacity: 0,
-            scale: 0.5,
-            rotateX: 45
-        });
-        
-        gsap.to(card, {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            rotateX: 0,
-            duration: 1,
-            delay: index * 0.2,
-            ease: 'back.out(1.4)',
-            scrollTrigger: {
-                trigger: '.prizes-row',
-                start: 'top 85%',
-                toggleActions: 'play none none reverse'
-            }
-        });
-    });
+    // NOTE: Prize cards animation is now handled by the pinned scroll timeline
+    // in the PRIZE POOL ANIMATION section - do not duplicate here
     
     // Section titles animation
     const sectionTitles = document.querySelectorAll('.section-title');
@@ -779,31 +780,8 @@ function initSectionAnimations() {
         );
     });
     
-    // Team members animation - staggered from bottom
-    const teamMembers = document.querySelectorAll('.team-member');
-    
-    teamMembers.forEach((member, index) => {
-        gsap.fromTo(member,
-            { 
-                y: 100, 
-                opacity: 0,
-                rotateY: -15
-            },
-            {
-                y: 0,
-                opacity: 1,
-                rotateY: 0,
-                duration: 1,
-                delay: index * 0.15,
-                ease: 'back.out(1.2)',
-                scrollTrigger: {
-                    trigger: '.team-grid',
-                    start: 'top 80%',
-                    toggleActions: 'play none none reverse'
-                }
-            }
-        );
-    });
+    // Team members - NO GSAP animations per user request
+    // Team section uses CSS-only animations defined in styles.css
     
     // About cards animation
     const aboutCards = document.querySelectorAll('.about-card');
@@ -855,27 +833,7 @@ function initSectionAnimations() {
         );
     });
     
-    // Footer animation
-    const footerMain = document.querySelector('.footer-main');
-    if (footerMain) {
-        gsap.fromTo(footerMain,
-            { 
-                y: 50, 
-                opacity: 0
-            },
-            {
-                y: 0,
-                opacity: 1,
-                duration: 1,
-                ease: 'power3.out',
-                scrollTrigger: {
-                    trigger: '.footer',
-                    start: 'top 90%',
-                    toggleActions: 'play none none reverse'
-                }
-            }
-        );
-    }
+    // Footer - No GSAP animation, keeping it simple
 }
 
 // Smooth Scroll Links - Fixed for proper section targeting
@@ -971,11 +929,7 @@ function initPremiumAnimations() {
     initSmoothScrollLinks();
 }
 
-// Run after DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Small delay to ensure everything is loaded
-    setTimeout(initPremiumAnimations, 100);
-});
+// Run after DOM is ready - consolidated into main init function
 
 // ============================================
 // HERO VIDEO SPEED CONTROL
@@ -1159,8 +1113,7 @@ function initHellBackground() {
     render();
 }
 
-// Initialize hell background when DOM is ready
-document.addEventListener('DOMContentLoaded', initHellBackground);
+// Initialize hell background - consolidated into main init function
 
 // ============================================
 // SMOOTH SCROLLING WITH LENIS
@@ -1536,25 +1489,72 @@ const particlesContainer = document.getElementById('particles');
 const cursor = document.getElementById('cursor');
 const cursorDot = document.getElementById('cursorDot');
 
-// Custom Cursor
+// Custom Cursor - Works on both desktop and mobile
 document.addEventListener('mousemove', (e) => {
-    gsap.to(cursor, {
-        x: e.clientX - 10,
-        y: e.clientY - 10,
-        duration: 0.2,
-        ease: 'power2.out'
-    });
-    gsap.to(cursorDot, {
-        x: e.clientX - 2.5,
-        y: e.clientY - 2.5,
-        duration: 0.1
-    });
+    if (cursor) {
+        gsap.to(cursor, {
+            x: e.clientX - 10,
+            y: e.clientY - 10,
+            duration: 0.2,
+            ease: 'power2.out'
+        });
+    }
+    if (cursorDot) {
+        gsap.to(cursorDot, {
+            x: e.clientX - 2.5,
+            y: e.clientY - 2.5,
+            duration: 0.1
+        });
+    }
 });
+
+// Touch support for custom cursor on mobile
+document.addEventListener('touchmove', (e) => {
+    if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        if (cursor) {
+            gsap.to(cursor, {
+                x: touch.clientX - 10,
+                y: touch.clientY - 10,
+                duration: 0.1,
+                ease: 'power2.out'
+            });
+        }
+        if (cursorDot) {
+            gsap.to(cursorDot, {
+                x: touch.clientX - 2.5,
+                y: touch.clientY - 2.5,
+                duration: 0.05
+            });
+        }
+    }
+}, { passive: true });
+
+// Show cursor on touch start
+document.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        if (cursor) {
+            cursor.style.opacity = '1';
+            gsap.set(cursor, { x: touch.clientX - 10, y: touch.clientY - 10 });
+        }
+        if (cursorDot) {
+            cursorDot.style.opacity = '1';
+            gsap.set(cursorDot, { x: touch.clientX - 2.5, y: touch.clientY - 2.5 });
+        }
+    }
+}, { passive: true });
+
+// Hide cursor on touch end (optional - comment out to keep visible)
+document.addEventListener('touchend', () => {
+    // Keep cursor visible after touch
+    // if (cursor) cursor.style.opacity = '0.5';
+}, { passive: true });
 
 // Cursor hover effect
 document.querySelectorAll('a, button, .round-card, .sponsor-card').forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    el.addEventListener('mouseenter', () => cursor && cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor && cursor.classList.remove('hover'));
 });
 
 // Audio Control with Web Audio API for maximum volume boost
@@ -2131,65 +2131,7 @@ gsap.utils.toArray('.sponsor-card').forEach((card, index) => {
     });
 });
 
-// Footer Animation - Updated to match actual HTML structure
-const footer = document.querySelector('.footer');
-if (footer) {
-    const footerTl = gsap.timeline({
-        scrollTrigger: {
-            trigger: '.footer',
-            start: 'top 90%',
-            toggleActions: 'play reverse play reverse'
-        }
-    });
-
-    // Footer logo container animation
-    const footerLogoContainer = document.querySelector('.footer-logo-container');
-    if (footerLogoContainer) {
-        footerTl.from(footerLogoContainer, {
-            y: 40,
-            opacity: 0,
-            duration: 0.8,
-            ease: 'power3.out'
-        });
-    }
-
-    // Footer nav links animation
-    const footerNavLinks = document.querySelectorAll('.footer-nav-links a');
-    if (footerNavLinks.length > 0) {
-        gsap.from(footerNavLinks, {
-            scrollTrigger: {
-                trigger: '.footer',
-                start: 'top 90%',
-                toggleActions: 'play reverse play reverse'
-            },
-            y: 25,
-            opacity: 0,
-            stagger: 0.1,
-            duration: 0.5,
-            delay: 0.4,
-            ease: 'power2.out'
-        });
-    }
-
-    // Footer social icons animation
-    const socialIcons = document.querySelectorAll('.footer-social .social-icon');
-    if (socialIcons.length > 0) {
-        gsap.from(socialIcons, {
-            scrollTrigger: {
-                trigger: '.footer',
-                start: 'top 90%',
-                toggleActions: 'play reverse play reverse'
-            },
-            scale: 0,
-            rotation: 180,
-            opacity: 0,
-            stagger: 0.1,
-            duration: 0.6,
-            delay: 0.6,
-            ease: 'back.out(2)'
-        });
-    }
-}
+// Footer - No GSAP animations, keeping it simple and always visible
 
 // ============================================
 // GLOBAL SCROLL-BASED PARALLAX EFFECTS
@@ -2223,21 +2165,7 @@ if (typeof lenis !== 'undefined' && lenis) {
 // - .quote-section, .quote-marks, .main-quote, .quote-content (don't exist)
 // - .login-section, .vecna-silhouette, .login-form-container, .login-container (don't exist)
 
-// Footer reveal - only if footer-content exists
-const footerContent = document.querySelector('.footer-content');
-if (footerContent) {
-    gsap.from(footerContent, {
-        scrollTrigger: {
-            trigger: footerContent.closest('.footer') || footerContent,
-            start: 'top 90%',
-            end: 'top 60%',
-            scrub: 0.5
-        },
-        y: 50,
-        opacity: 0,
-        ease: 'none'
-    });
-}
+// Footer - No animations, always visible
 
 // ============================================
 // INTERACTIVE EFFECTS
@@ -2399,124 +2327,106 @@ floatingImages.forEach((img, index) => {
 });
 
 // ============================================
-// PRIZE POOL SCROLL-TRIGGERED ANIMATION (NO PINNING)
+// PRIZE POOL ANIMATION - PINNED SCROLL
+// Bus moves across while prize cards reveal simultaneously
 // ============================================
 
 const prizeSection = document.querySelector('.prize-section');
 const schoolBusGroup = document.getElementById('cyclistsGroup');
-const prize1 = document.querySelector('.prize-1');
-const prize2 = document.querySelector('.prize-2');
-const prize3 = document.querySelector('.prize-3');
-const prizeStickyWrapper = document.querySelector('.prize-sticky-wrapper');
 const cyclingTrack = document.querySelector('.cycling-track');
+const prizeCards = document.querySelectorAll('.prize-card');
 
-if (prizeSection && schoolBusGroup) {
-
-    // Ensure prize section header is always visible
-    const prizeHeader = prizeSection.querySelector('.section-header');
-    if (prizeHeader) {
-        gsap.set(prizeHeader, {
-            opacity: 1,
-            visibility: 'visible',
-            y: 0
-        });
-    }
-
-    // Set initial states for prize cards
-    if (prize1 && prize2 && prize3) {
-        gsap.set([prize1, prize2, prize3], {
-            opacity: 0,
-            y: 60,
-            scale: 0.9
-        });
-    }
-
-    // Set initial bus position
-    gsap.set(schoolBusGroup, {
-        x: -200
-    });
-
+if (prizeSection && schoolBusGroup && cyclingTrack) {
     // Calculate the distance bus needs to travel
-    const trackWidth = cyclingTrack ? cyclingTrack.offsetWidth : window.innerWidth;
+    const trackWidth = cyclingTrack.offsetWidth || window.innerWidth;
     const travelDistance = trackWidth + 250;
 
-    // Bus animation - scrub without pinning
-    gsap.to(schoolBusGroup, {
-        x: travelDistance,
-        ease: 'none',
-        scrollTrigger: {
-            trigger: prizeSection,
-            start: 'top 80%',
-            end: 'bottom 20%',
-            scrub: 1,
-            onUpdate: (self) => {
-                const progress = self.progress;
-                if (progress > 0.05 && progress < 0.95) {
-                    schoolBusGroup.classList.add('moving');
-                } else {
-                    schoolBusGroup.classList.remove('moving');
-                }
-            }
-        }
-    });
-
-    // Prize cards reveal animations - staggered on scroll
-    if (prize3) {
-        gsap.to(prize3, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.8,
-            ease: 'power2.out',
-            scrollTrigger: {
-                trigger: prize3,
-                start: 'top 85%',
-                toggleActions: 'play none none reverse'
-            }
+    // Check if mobile - disable pinning on mobile
+    const isMobileDevice = window.innerWidth <= 768;
+    
+    if (isMobileDevice) {
+        // On mobile, show everything immediately without animation
+        gsap.set(schoolBusGroup, { x: travelDistance }); // Bus at end position
+        prizeCards.forEach(card => {
+            gsap.set(card, { 
+                y: 0, 
+                opacity: 1,
+                scale: 1,
+                rotateX: 0
+            });
         });
-    }
-
-    if (prize1) {
-        gsap.to(prize1, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.8,
-            ease: 'power2.out',
-            scrollTrigger: {
-                trigger: prize1,
-                start: 'top 85%',
-                toggleActions: 'play none none reverse'
-            }
+    } else {
+        // Desktop: Set initial states
+        gsap.set(schoolBusGroup, { x: -200 });
+        
+        // Prize cards start hidden
+        prizeCards.forEach(card => {
+            gsap.set(card, { 
+                y: 60, 
+                opacity: 0,
+                scale: 0.9
+            });
         });
-    }
 
-    if (prize2) {
-        gsap.to(prize2, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.8,
-            ease: 'power2.out',
-            scrollTrigger: {
-                trigger: prize2,
-                start: 'top 85%',
-                toggleActions: 'play none none reverse'
-            }
-        });
-    }
-
-    // Hide scroll hint on scroll
-    const scrollHint = document.querySelector('.prize-scroll-hint');
-    if (scrollHint) {
-        gsap.to(scrollHint, {
-            opacity: 0,
+        // Create pinned timeline for prize section
+        // Start pinning when section is 10% from top to ensure content fits
+        const prizeTl = gsap.timeline({
             scrollTrigger: {
                 trigger: prizeSection,
-                start: 'top 60%',
-                toggleActions: 'play none none reverse'
+                start: 'top 10%', // Start pin when section is 10% from top
+                end: '+=120%', // Pin for 1.2x the section height
+                pin: true,
+                pinSpacing: true,
+                scrub: 0.5,
+                anticipatePin: 1,
+                onUpdate: (self) => {
+                    // Bus moving animation
+                    if (self.progress > 0.02 && self.progress < 0.5) {
+                        schoolBusGroup.classList.add('moving');
+                    } else {
+                        schoolBusGroup.classList.remove('moving');
+                    }
+                }
             }
         });
+
+        // Bus moves across the screen (0% - 50% of timeline)
+        prizeTl.to(schoolBusGroup, {
+            x: travelDistance,
+            ease: 'power1.inOut',
+            duration: 0.5
+        }, 0);
+
+        // Prize cards reveal simultaneously with bus movement
+        // 3rd prize starts at 15%
+        prizeTl.to('.prize-card.prize-3', {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.2,
+            ease: 'back.out(1.2)'
+        }, 0.15);
+
+        // 1st prize (center) starts at 25%
+        prizeTl.to('.prize-card.prize-1', {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.2,
+            ease: 'back.out(1.2)'
+        }, 0.25);
+
+        // 2nd prize starts at 35%
+        prizeTl.to('.prize-card.prize-2', {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.2,
+            ease: 'back.out(1.2)'
+        }, 0.35);
+
+        // Hold at end for a moment
+        prizeTl.to({}, { duration: 0.1 });
     }
 }
 
@@ -2542,16 +2452,18 @@ style.textContent = `
 document.head.appendChild(style);
 
 // ============================================
-// NAVIGATION ACTIVE STATE
+// NAVIGATION ACTIVE STATE - CONSOLIDATED
+// Note: Nav click handling is done in initSmoothScrollLinks()
+// This section only handles ScrollTrigger-based active state updates
 // ============================================
 
-// Get all nav links and sections
-const navLinks = document.querySelectorAll('.nav-links a');
-const sections = document.querySelectorAll('section[id]');
+// Get all nav links and sections for ScrollTrigger updates
+const navLinksForScroll = document.querySelectorAll('.nav-links a');
+const sectionsForScroll = document.querySelectorAll('section[id]');
 
 // Function to update active nav link
 function updateActiveNav(activeId) {
-    navLinks.forEach(link => {
+    navLinksForScroll.forEach(link => {
         link.classList.remove('active');
         if (link.getAttribute('href') === `#${activeId}`) {
             link.classList.add('active');
@@ -2559,29 +2471,9 @@ function updateActiveNav(activeId) {
     });
 }
 
-// Click handler for nav links
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = link.getAttribute('href').substring(1);
-        const targetSection = document.getElementById(targetId);
-
-        if (targetSection) {
-            // Update active state immediately on click
-            updateActiveNav(targetId);
-
-            // Smooth scroll to section
-            gsap.to(window, {
-                duration: 1,
-                scrollTo: { y: targetSection, offsetY: 80 },
-                ease: 'power2.inOut'
-            });
-        }
-    });
-});
-
 // ScrollTrigger for each section to update nav on scroll
-sections.forEach(section => {
+// This complements the scroll-based detection in initSmoothScrollLinks()
+sectionsForScroll.forEach(section => {
     ScrollTrigger.create({
         trigger: section,
         start: 'top 40%',
@@ -2597,19 +2489,23 @@ class TextScramble {
         this.el = el;
         this.chars = '!<>-_\\/[]{}—=+*^?#@$%&ΩΨΣΔ________';
         this.update = this.update.bind(this);
+        // Store original text immediately
+        this.originalText = el.innerText;
     }
 
     setText(newText) {
-        const oldText = this.el.innerText;
+        // Always ensure we have text to show
+        if (!newText) newText = this.originalText;
+        const oldText = this.el.innerText || this.originalText;
         const length = Math.max(oldText.length, newText.length);
         const promise = new Promise((resolve) => this.resolve = resolve);
         this.queue = [];
 
         for (let i = 0; i < length; i++) {
-            const from = oldText[i] || '';
+            const from = oldText[i] || newText[i] || '';
             const to = newText[i] || '';
-            const start = Math.floor(Math.random() * 40);
-            const end = start + Math.floor(Math.random() * 40);
+            const start = Math.floor(Math.random() * 20); // Faster start
+            const end = start + Math.floor(Math.random() * 20); // Faster completion
             this.queue.push({ from, to, start, end });
         }
 
@@ -2636,7 +2532,8 @@ class TextScramble {
                 }
                 output += `<span class="scramble">${char}</span>`;
             } else {
-                output += from;
+                // Show the target character instead of empty/from
+                output += to || from;
             }
         }
 
@@ -2664,15 +2561,26 @@ function initChallengeTextScramble() {
         
         if (!title) return;
         
+        // Store original text before any manipulation
         const originalTitleText = title.innerText;
+        
+        // Ensure title is visible with original text
+        title.style.opacity = '1';
+        title.style.visibility = 'visible';
+        
         const titleFx = new TextScramble(title);
         
         // Store original tag texts
-        const tagData = Array.from(tags).map(tag => ({
-            el: tag,
-            fx: new TextScramble(tag),
-            originalText: tag.innerText
-        }));
+        const tagData = Array.from(tags).map(tag => {
+            // Ensure tags are visible
+            tag.style.opacity = '1';
+            tag.style.visibility = 'visible';
+            return {
+                el: tag,
+                fx: new TextScramble(tag),
+                originalText: tag.innerText
+            };
+        });
         
         // Scroll trigger - scramble reveal when entering viewport
         let hasTriggered = false;
@@ -2683,7 +2591,7 @@ function initChallengeTextScramble() {
             onEnter: () => {
                 if (!hasTriggered) {
                     hasTriggered = true;
-                    // Scramble the title
+                    // Scramble the title - text stays visible during animation
                     titleFx.setText(originalTitleText);
                     
                     // Scramble tags with stagger
@@ -2709,14 +2617,8 @@ function initChallengeTextScramble() {
     });
 }
 
-// Initialize on DOM ready - with longer delay to ensure everything is loaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(initChallengeTextScramble, 800);
-    });
-} else {
-    setTimeout(initChallengeTextScramble, 800);
-}
+// Initialize on DOM ready - consolidated into main init function
+// Text scramble is now initialized via initializeWebsite()
 
 // Add scramble style
 const scrambleStyle = document.createElement('style');
@@ -2725,6 +2627,7 @@ scrambleStyle.textContent = `
         color: #e50914;
         text-shadow: 0 0 10px #e50914, 0 0 20px #e50914;
         animation: scrambleFlicker 0.1s infinite;
+        display: inline;
     }
     
     @keyframes scrambleFlicker {
@@ -2732,16 +2635,24 @@ scrambleStyle.textContent = `
         50% { opacity: 0.8; }
     }
     
+    /* Ensure challenge titles are always visible */
     .challenge-title {
         transition: text-shadow 0.3s ease;
+        opacity: 1 !important;
+        visibility: visible !important;
+        min-height: 1.2em;
     }
     
     .challenge-page:hover .challenge-title {
         text-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
     }
     
+    /* Ensure tags are always visible */
     .challenge-tags span {
         transition: all 0.3s ease;
+        opacity: 1 !important;
+        visibility: visible !important;
+        min-height: 1em;
     }
 `;
 document.head.appendChild(scrambleStyle);
@@ -2822,77 +2733,8 @@ function initEnhancedGSAPAnimations() {
         // Gallery uses CSS animation for auto-scrolling, no GSAP needed for items
     }
 
-    // Team Section Animations - Enhanced
-    const teamSection = document.querySelector('.team-section');
-    if (teamSection) {
-        const teamTitle = teamSection.querySelector('.gsap-title');
-        const teamFade = teamSection.querySelector('.gsap-fade');
-        const teamMembers = document.querySelectorAll('.gsap-team');
-        const teamGrid = document.querySelector('.team-grid');
-        
-        // Set initial states for team members
-        if (teamMembers.length > 0) {
-            gsap.set(teamMembers, {
-                opacity: 0,
-                y: 80,
-                scale: 0.8,
-                rotateY: -15,
-                transformPerspective: 1000
-            });
-        }
-
-        // Title animation with glow effect
-        if (teamTitle) {
-            gsap.to(teamTitle, {
-                opacity: 1,
-                y: 0,
-                duration: 1.2,
-                ease: 'power3.out',
-                scrollTrigger: {
-                    trigger: teamSection,
-                    start: 'top 80%',
-                    toggleActions: 'play none none reverse'
-                }
-            });
-        }
-
-        // Subtitle animation
-        if (teamFade) {
-            gsap.to(teamFade, {
-                opacity: 1,
-                y: 0,
-                duration: 0.8,
-                delay: 0.3,
-                ease: 'power3.out',
-                scrollTrigger: {
-                    trigger: teamSection,
-                    start: 'top 80%',
-                    toggleActions: 'play none none reverse'
-                }
-            });
-        }
-
-        // Team members cinematic entrance with stagger
-        if (teamMembers.length > 0 && teamGrid) {
-            gsap.to(teamMembers, {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                rotateY: 0,
-                duration: 1,
-                stagger: {
-                    each: 0.12,
-                    from: 'center'
-                },
-                ease: 'back.out(1.5)',
-                scrollTrigger: {
-                    trigger: teamGrid,
-                    start: 'top 85%',
-                    toggleActions: 'play none none reverse'
-                }
-            });
-        }
-    }
+    // Team Section - No GSAP animations, using CSS only
+    // Removed GSAP animations as per user request
 
     // Sponsors Section Animation
     const sponsorsSection = document.querySelector('.sponsors-section');
@@ -2913,85 +2755,18 @@ function initEnhancedGSAPAnimations() {
         }
     }
 
-    // Footer Animation
-    const footer = document.querySelector('.footer');
-    if (footer) {
-        const footerElements = footer.querySelectorAll('.footer-brand, .footer-nav, .footer-info, .footer-connect');
-        if (footerElements.length > 0) {
-            gsap.fromTo(footerElements,
-                {
-                    opacity: 0,
-                    y: 50
-                },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.8,
-                    stagger: 0.1,
-                    ease: 'power3.out',
-                    scrollTrigger: {
-                        trigger: footer,
-                        start: 'top 90%',
-                        toggleActions: 'play none none reverse'
-                    }
-                }
-            );
-        }
-    }
+    // Footer - No GSAP animations, always visible
 
-    // Smooth scroll snap effect for sections
-    const sections = document.querySelectorAll('section');
-    sections.forEach(section => {
-        ScrollTrigger.create({
-            trigger: section,
-            start: 'top top',
-            end: 'bottom top',
-            onEnter: () => {
-                // Update active nav link
-                const id = section.getAttribute('id');
-                document.querySelectorAll('.nav-links a').forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${id}`) {
-                        link.classList.add('active');
-                    }
-                });
-            },
-            onEnterBack: () => {
-                const id = section.getAttribute('id');
-                document.querySelectorAll('.nav-links a').forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${id}`) {
-                        link.classList.add('active');
-                    }
-                });
-            }
-        });
-    });
+    // Smooth scroll snap effect for sections - REMOVED
+    // Nav active state is handled by the consolidated NAVIGATION ACTIVE STATE section
+    // This was creating duplicate ScrollTriggers on every section
 
-    // Horizontal text scroll effect for section headers
-    document.querySelectorAll('.section-title').forEach(title => {
-        gsap.fromTo(title,
-            { 
-                backgroundPosition: '0% 50%' 
-            },
-            {
-                backgroundPosition: '100% 50%',
-                ease: 'none',
-                scrollTrigger: {
-                    trigger: title,
-                    start: 'top bottom',
-                    end: 'bottom top',
-                    scrub: 2
-                }
-            }
-        );
-    });
+    // Horizontal text scroll effect for section headers - REMOVED
+    // This was causing duplicate animations on section titles
+    // Section titles are already animated by initSectionAnimations()
 }
 
-// Initialize enhanced animations after DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(initEnhancedGSAPAnimations, 200);
-});
+// Initialize enhanced animations - consolidated into main init function
 
 // ============================================
 // SCROLL-TRIGGERED PARALLAX EFFECTS
@@ -3043,9 +2818,7 @@ function initParallaxEffects() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(initParallaxEffects, 300);
-});
+// Parallax effects - consolidated into main init function
 
 // ============================================
 // SMOOTH SCROLL ENHANCEMENT
@@ -3073,9 +2846,7 @@ function initSmoothScrollEnhancement() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(initSmoothScrollEnhancement, 400);
-});
+// Smooth scroll enhancement - consolidated into main init function
 
 
 // ============================================
@@ -3257,14 +3028,7 @@ function initFAQContactAnimations() {
     }
 }
 
-// Initialize FAQ and Contact
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        initFAQAccordion();
-        initContactForm();
-        initFAQContactAnimations();
-    }, 600);
-});
+// Initialize FAQ and Contact - consolidated into main init function
 
 
 // ============================================
@@ -3311,10 +3075,7 @@ function initChallengePageAnimations() {
     });
 }
 
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(initChallengePageAnimations, 700);
-});
+// Initialize on DOM ready - consolidated into main init function
 
 // ============================================
 // ABOUT SECTION - MOUSE REVEAL ANIMATION
@@ -3398,10 +3159,7 @@ function tryInitAboutMouseReveal() {
     initAboutMouseReveal();
 }
 
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(tryInitAboutMouseReveal, 800);
-});
+// Initialize on DOM ready - consolidated into main init function
 
 
 // ============================================
@@ -3539,16 +3297,7 @@ function initVisibilityOptimization() {
     });
 }
 
-// Initialize optimizations after DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Wait for main content to load
-    setTimeout(() => {
-        initSkeletonLoading();
-        initLazyLoading();
-        optimizeScrollPerformance();
-        initVisibilityOptimization();
-    }, 100);
-});
+// Initialize optimizations - consolidated into main init function
 
 // Preconnects are now handled in HTML head for better performance
 
@@ -3603,7 +3352,55 @@ function initHeroButtonsVisibility() {
     }, { passive: true });
 }
 
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(initHeroButtonsVisibility, 100);
-});
+// Initialize on DOM ready - consolidated into main init function
+
+
+// ============================================
+// CONSOLIDATED INITIALIZATION
+// Single entry point for all initializations
+// ============================================
+
+function initializeWebsite() {
+    // Phase 1: Critical - Immediate (0ms)
+    ImageSequenceScroll.init();
+    initHellBackground();
+    initHeroButtonsVisibility();
+    
+    // Phase 2: Core animations (100ms)
+    setTimeout(() => {
+        initPremiumAnimations();
+        initSkeletonLoading();
+        initLazyLoading();
+    }, 100);
+    
+    // Phase 3: Enhanced features (200ms)
+    setTimeout(() => {
+        initEnhancedGSAPAnimations();
+        initParallaxEffects();
+    }, 200);
+    
+    // Phase 4: Secondary features (400ms)
+    setTimeout(() => {
+        initSmoothScrollEnhancement();
+        initFAQAccordion();
+        initContactForm();
+        initFAQContactAnimations();
+    }, 400);
+    
+    // Phase 5: Final polish (700ms)
+    setTimeout(() => {
+        initChallengePageAnimations();
+        initChallengeTextScramble();
+        tryInitAboutMouseReveal();
+        optimizeScrollPerformance();
+        initVisibilityOptimization();
+    }, 700);
+}
+
+// Single DOMContentLoaded handler
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeWebsite);
+} else {
+    // DOM already loaded
+    initializeWebsite();
+}
