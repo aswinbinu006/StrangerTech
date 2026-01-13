@@ -23,13 +23,10 @@
     
     <!-- Fonts with display swap for better performance -->
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Special+Elite&family=Orbitron:wght@400;700&family=Cinzel:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <!-- ITC Benguiat Bold - The Official Stranger Things Font -->
-    <link href="https://fonts.cdnfonts.com/css/itc-benguiat" rel="stylesheet" media="print" onload="this.media='all'">
     
     <!-- Fallback for browsers without JS -->
     <noscript>
         <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Special+Elite&family=Orbitron:wght@400;700&family=Cinzel:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
-        <link href="https://fonts.cdnfonts.com/css/itc-benguiat" rel="stylesheet">
     </noscript>
     
     <link rel="stylesheet" href="styles.css">
@@ -58,6 +55,34 @@
         <div class="red-cloud red-cloud-5"></div>
         <div class="red-cloud red-cloud-6"></div>
     </div>
+
+    <!-- Go Back Button - Stranger Things Themed -->
+    <a href="https://enthusia-5-0.netlify.app/#techfest-events" class="go-back-btn" id="goBackBtn">
+        <div class="go-back-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+        </div>
+        <span class="go-back-text">GO BACK</span>
+        <div class="go-back-glow"></div>
+    </a>
+
+    <!-- Registration Button - Stranger Things Themed -->
+    <a href="#" class="register-btn" id="registerBtn">
+        <div class="register-lights">
+            <span class="reg-light"></span>
+            <span class="reg-light"></span>
+            <span class="reg-light"></span>
+            <span class="reg-light"></span>
+            <span class="reg-light"></span>
+        </div>
+        <div class="register-content">
+            <span class="register-icon">011</span>
+            <span class="register-text">REGISTER NOW</span>
+        </div>
+        <div class="register-glow"></div>
+        <div class="register-portal"></div>
+    </a>
 
     <!-- Audio Controls - Stranger Things Themed -->
     <div class="audio-control" id="audioControl">
@@ -110,6 +135,7 @@
             <li><a href="#challenge1" class="magnetic" data-strength="0.2">ROUNDS</a></li>
             <li><a href="#gallery" class="magnetic" data-strength="0.2">GALLERY</a></li>
             <li><a href="#prizes" class="magnetic" data-strength="0.2">PRIZES</a></li>
+            <li><a href="#team" class="magnetic" data-strength="0.2">TEAM</a></li>
             <li><a href="#faq" class="magnetic" data-strength="0.2">FAQ</a></li>
             <li><a href="#contact" class="magnetic" data-strength="0.2">CONTACT</a></li>
         </ul>
@@ -453,10 +479,24 @@
         </div>
     </section>
 
+    <!-- Section Divider -->
+    <div class="section-divider">
+        <div class="divider-line"></div>
+        <div class="divider-lights">
+            <span class="d-light"></span>
+            <span class="d-light"></span>
+            <span class="d-light"></span>
+            <span class="d-light"></span>
+            <span class="d-light"></span>
+        </div>
+        <div class="divider-line"></div>
+    </div>
+
     <!-- Prize Pool Section -->
     <section class="prize-section" id="prizes">
         <div class="prize-sticky-wrapper">
             <div class="section-header">
+                <span class="section-tag">SEC. 004</span>
                 <h2 class="section-title">PRIZE POOL</h2>
                 <p class="section-subtitle">Rewards for those who survive the Upside Down</p>
             </div>
@@ -598,7 +638,7 @@
     <!-- Team Section -->
     <section class="team-section" id="team">
         <div class="section-header">
-            <span class="section-tag">SEC. 004</span>
+            <span class="section-tag">SEC. 005</span>
             <h2 class="section-title gsap-title">THE PARTY</h2>
             <p class="section-subtitle gsap-fade">The heroes behind the Upside Down Challenge</p>
         </div>
@@ -708,13 +748,13 @@
     <!-- FAQ Section -->
     <section class="faq-section" id="faq">
         <div class="section-header">
-            <span class="section-tag">SEC. 005</span>
-            <h2 class="section-title">FREQUENTLY ASKED</h2>
-            <p class="section-subtitle">Everything you need to know before entering the Upside Down</p>
+            <span class="section-tag">SEC. 006</span>
+            <h2 class="section-title gsap-title">FREQUENTLY ASKED</h2>
+            <p class="section-subtitle gsap-fade">Everything you need to know before entering the Upside Down</p>
         </div>
         
         <div class="faq-container">
-            <div class="faq-item" data-index="1">
+            <div class="faq-item gsap-faq" data-index="1">
                 <div class="faq-question">
                     <span class="faq-icon">❓</span>
                     <h3>What is Stranger Tech?</h3>
@@ -725,7 +765,7 @@
                 </div>
             </div>
             
-            <div class="faq-item" data-index="2">
+            <div class="faq-item gsap-faq" data-index="2">
                 <div class="faq-question">
                     <span class="faq-icon">👥</span>
                     <h3>How many members per team?</h3>
@@ -736,7 +776,7 @@
                 </div>
             </div>
             
-            <div class="faq-item" data-index="3">
+            <div class="faq-item gsap-faq" data-index="3">
                 <div class="faq-question">
                     <span class="faq-icon">💻</span>
                     <h3>What skills do I need?</h3>
@@ -747,7 +787,7 @@
                 </div>
             </div>
             
-            <div class="faq-item" data-index="4">
+            <div class="faq-item gsap-faq" data-index="4">
                 <div class="faq-question">
                     <span class="faq-icon">📅</span>
                     <h3>When and where is the event?</h3>
@@ -758,7 +798,7 @@
                 </div>
             </div>
             
-            <div class="faq-item" data-index="5">
+            <div class="faq-item gsap-faq" data-index="5">
                 <div class="faq-question">
                     <span class="faq-icon">🎁</span>
                     <h3>What are the prizes?</h3>
@@ -769,7 +809,7 @@
                 </div>
             </div>
             
-            <div class="faq-item" data-index="6">
+            <div class="faq-item gsap-faq" data-index="6">
                 <div class="faq-question">
                     <span class="faq-icon">📝</span>
                     <h3>How do I register?</h3>
@@ -794,33 +834,33 @@
     <!-- Contact Section -->
     <section class="contact-section" id="contact">
         <div class="section-header">
-            <span class="section-tag">SEC. 006</span>
-            <h2 class="section-title">CONTACT US</h2>
-            <p class="section-subtitle">Reach out to Hawkins Lab for any queries</p>
+            <span class="section-tag">SEC. 007</span>
+            <h2 class="section-title gsap-title">CONTACT US</h2>
+            <p class="section-subtitle gsap-fade">Reach out to Hawkins Lab for any queries</p>
         </div>
         
         <div class="contact-container">
             <div class="contact-info">
-                <div class="contact-card">
+                <div class="contact-card gsap-contact">
                     <div class="contact-icon">📍</div>
                     <h3>Location</h3>
                     <p>SIT Nagpur<br>Symbiosis Institute of Technology</p>
                     <a href="https://maps.app.goo.gl/7iEiFqCYY373Bnfb8" target="_blank" rel="noopener noreferrer" class="map-link">View on Google Maps →</a>
                 </div>
                 
-                <div class="contact-card">
+                <div class="contact-card gsap-contact">
                     <div class="contact-icon">👤</div>
                     <h3>Event Coordinator</h3>
                     <p>Mahek Patel<br>+91 95297 83646</p>
                 </div>
                 
-                <div class="contact-card">
+                <div class="contact-card gsap-contact">
                     <div class="contact-icon">📧</div>
                     <h3>Email</h3>
                     <p>enthusia@sitnagpur.siu.edu.in</p>
                 </div>
                 
-                <div class="contact-card">
+                <div class="contact-card gsap-contact">
                     <div class="contact-icon">🕐</div>
                     <h3>Event Timing</h3>
                     <p>10:00 AM - 5:00 PM<br>Full Day Event</p>
